@@ -1,0 +1,26 @@
+.auth {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* border: 2px solid black; */
+    padding: 2rem 0;
+}
+
+.authImg img {
+    width: 80%;
+    display: block;
+    margin: 5rem auto;
+}
+
+.authForm {
+    padding: 4rem 0;
+    /* border: 2px solid green; */
+}
+
+@media (max-width: 745px) {
+    .auth {
+        display: block;
+    }
+    .authImg img {
+        margin: auto;
+    }
+}

@@ -1,0 +1,47 @@
+.authcomp {
+    width: 80%;
+    margin: auto;
+    /* border: 2px solid salmon; */
+}
+.authTitle {
+    margin-bottom: 1.5rem;
+}
+.authcomp label {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+.authcomp input {
+    border-style: none;
+    border: 2px solid var(--primary);
+    border-radius: 0.5rem;
+    width: 100%;
+    height: 3.5rem;
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    margin-bottom: 3rem;
+}
+.authcomp input:focus {
+    outline: none;
+}
+.authbtn {
+    width: 100%;
+    font-size: 2rem;
+    border-style: none;
+    color: white;
+    background-color: var(--primary);
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 1rem 0;
+}
+.authToggle {
+    font-size: 1.5rem;
+    width: 100%;
+    display: flex;
+    margin: 2rem 0;
+}
+
+@media (max-width: 745px) {
+    .authcomp {
+        width: 90%;
+    }
+}
