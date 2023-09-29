@@ -48,3 +48,25 @@ export interface IOrderDetails {
     quantity: number, 
     address: string,
 };
+
+export interface IProductApiReturn {
+    message: string,
+    products?: IProduct[],
+};
+
+export interface IProductFuncReturn {
+    isSuccess: boolean,
+    error: string | null,
+    products: IProduct[],
+};
+
+export interface IUserApiReturn {
+    message: string,
+    user?: IUser
+};
+
+export interface IUserFuncReturn {
+    isSuccess: boolean,
+    error: string | null,
+    user: IUser | null,
+};

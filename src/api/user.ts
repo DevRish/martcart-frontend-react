@@ -1,23 +1,20 @@
-import { SERVER_URL } from "../config/keys";
+import axiosClient from "../config/axiosClient";
+import { IUserApiReturn, IUserFuncReturn } from "../types/apiUtilTypes";
 
-const BASE_URL = `${SERVER_URL}/api`;
-
-export const getUserData = async (userData) => {
+export const getUserData = async () : Promise<IUserFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/user/getUser`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(userData)
-        });
-        const data = await res.json();
-        if(res.status === 200) return data;
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return {};
+        const res = await axiosClient.get("/user/getUser");
+        const data: IUserApiReturn = res.data;
+        if(res.status === 200) {
+            return ({ isSuccess: true, user: (data.user) ? data.user : null, error: null });
+        } else {
+            return ({ isSuccess: false, user: null, error: data.message });
         }
     } 
-    catch (error) { console.log('Error while getting user data : ' + error) }
+    catch (error) { 
+        console.log('Error while getting cart : ');
+        console.log(error);
+        return ({ isSuccess: false, user: null, error: "Something went wrong" });
+    }
 }

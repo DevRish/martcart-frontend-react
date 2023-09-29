@@ -1,17 +1,20 @@
-import { SERVER_URL } from "../config/keys";
+import axiosClient from "../config/axiosClient";
+import { IProductApiReturn, IProductFuncReturn } from "../types/apiUtilTypes";
 
-const BASE_URL = `${SERVER_URL}/api`;
-
-export const getAllProducts = async () => {
+export const getProducts = async () : Promise<IProductFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/product`);
-        const data = await res.json();
-        if(res.status === 200) return data;
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return ({});
-        };
+        const res = await axiosClient.get("/product");
+        const data: IProductApiReturn = res.data;
+        if(res.status === 200) {
+            return ({ isSuccess: true, products: (data.products) ? data.products : [], error: null });
+        } else {
+            return ({ isSuccess: false, products: [], error: data.message });
+        }
     } 
-    catch (error) { console.log('Error while getting products : '+error) }
+    catch (error) { 
+        console.log('Error while getting products : ');
+        console.log(error);
+        return ({ isSuccess: false, products: [], error: "Something went wrong" });
+    }
 }
