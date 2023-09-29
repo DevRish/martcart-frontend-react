@@ -1,33 +1,27 @@
 import { useState } from 'react';
-import { useQuery } from 'react-query';
-import { checkLoggedIn } from '../../api/auth';
-import { getCart } from '../../api/cart';
 import { Link } from 'react-router-dom';
 import './Navbar.css';
+import { IGlobalState } from '../../types/coreTypes';
+import { connect } from 'react-redux';
 
-const Navbar = () => {
+interface INavbarProps {
+    // Global State props
+    isLoggedIn: boolean,
+    cartItemCount: number,
+    firstname: string,
+    lastname: string,
+};
 
-    const authQuery = useQuery('auth', checkLoggedIn, { initialData: { username: '', isLoggedIn: false } } );
-    const cartQuery = useQuery('cart', async () => {
-        const { isLoggedIn, username } = await checkLoggedIn();
-        if(isLoggedIn)
-        {
-            const cartdata = await getCart(username);
-            return cartdata;
-        }
-        else return [];
-    }, { initialData: [] } )
+const Navbar = ({ isLoggedIn, cartItemCount, firstname, lastname } : INavbarProps) => {
 
     const [showMenu, setshowMenu] = useState(false);
-
-    const calcCartCount = () => {
-        if(cartQuery.data.length === 0) return 0;
-        else
-        {
-            let total = 0;
-            cartQuery.data.forEach((item) => { total += item.quantity });
-            return total;
-        }
+    const getInitials = () => {
+        let init: string = "";
+        if(firstname !== "") init += firstname[0];
+        if(lastname !== "") init += lastname[0];
+        init = init.trim();
+        if(init === "") init = "Profile";
+        return init;
     }
 
     return (
@@ -40,8 +34,8 @@ const Navbar = () => {
                     <li><Link to="/myorders">My Orders</Link></li>
                     <li>
                         {
-                            (authQuery.data.isLoggedIn) ? 
-                            <Link to="/profile">Profile</Link> :
+                            (isLoggedIn) ? 
+                            <Link to="/profile">{getInitials()}</Link> :
                             <Link to="/authpage">SignIn</Link>
                         } 
                     </li>
@@ -61,7 +55,7 @@ const Navbar = () => {
                                 placeItems:"center"
                         }}>
                             {/* {console.log(cartQuery)} */}
-                            <p style={{ fontSize: "1.5rem" }}>{calcCartCount()}</p></div>
+                            <p style={{ fontSize: "1.5rem" }}>{cartItemCount}</p></div>
                             <i className="fas fa-shopping-cart"></i>
                         </Link>
                     </li>
@@ -72,4 +66,13 @@ const Navbar = () => {
     )
 };
 
-export default Navbar;
+const mapStateToProps = function(state: IGlobalState) {
+  return {
+    isLoggedIn: state.auth.isLoggedIn,
+    cartItemCount: state.cart.total,
+    firstname: (state.auth.user) ? state.auth.user.firstname : "",
+    lastname: (state.auth.user) ? state.auth.user.lastname : "",
+  }
+}
+
+export default connect(mapStateToProps)(Navbar);

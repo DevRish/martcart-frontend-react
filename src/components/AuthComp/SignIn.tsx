@@ -1,12 +1,24 @@
 import {useState, useEffect} from 'react'
 import { useNavigate } from 'react-router-dom';
 import { authLogIn } from '../../api/auth';
-import { queryClient } from '../../config/queryClient';
 import './AuthComp.css'
-import { useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { loginAction } from '../../reducers/auth/authActions';
+import { getCart } from '../../api/cart';
+import { getOrders } from '../../api/order';
+import { setCartAction } from '../../reducers/cart/cartActions';
+import { setOrdersAction } from '../../reducers/order/orderActions';
 
-const SignIn = ({ setnavIndex }:any) => {
+interface ISignInProps {
+    // Global State props
+    loginDispatch: Function,
+    setCartDispatch: Function,
+    setOrdersDispatch: Function,
+    // Local State props
+    setnavIndex: Function,
+};
+
+const SignIn = ({ setnavIndex, loginDispatch, setCartDispatch, setOrdersDispatch } : ISignInProps) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
@@ -16,29 +28,37 @@ const SignIn = ({ setnavIndex }:any) => {
     const [password, setPassword] = useState('');
     const [failmsg, setFailMsg] = useState('');
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const handleLogIn = async () => { 
        if((username==='')||(password==='')) setFailMsg('Please fill all the fields');
-       else
-       {
+       else {
             const credentials = {
                 username: username,
                 password: password
-            }
-            const { isSuccess, error, user } = await authLogIn(credentials);
-            if(isSuccess) {
-                dispatch(loginAction({
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                }));
+            };
+            const authRet = await authLogIn(credentials);
+            if(authRet.isSuccess && authRet.user) {
+                const cartRet = await getCart();
+                const ordersRet = await getOrders();
+
+                if(!cartRet.isSuccess) console.log("Error while getting cart: ", cartRet.error);
+                if(!ordersRet.isSuccess) console.log("Error while getting cart: ", ordersRet.error);
+                // for now just displaying errors on console...
+                // the frontend app won't break, because epty arrays are returned on error, so no actual error is thrown
+
+                loginDispatch({
+                    firstname: authRet.user.firstname,
+                    lastname: authRet.user.lastname,
+                });
                 
-                // window.location = '/'; // needed to reload to re render everything before, but now with react-query, not required
-                queryClient.invalidateQueries('cart');
-                queryClient.invalidateQueries('order');
+                setCartDispatch(cartRet.cart);
+                setOrdersDispatch(ordersRet.orders);
+
                 navigate('/');
             }
-            else setFailMsg(error);
+            else {
+                setFailMsg(authRet.error ? authRet.error : "");
+            }
        }
     }
 
@@ -61,4 +81,10 @@ const SignIn = ({ setnavIndex }:any) => {
     )
 }
 
-export default SignIn
+const mapDispatchToProps = {
+  loginDispatch: loginAction,
+  setCartDispatch: setCartAction,
+  setOrdersDispatch: setOrdersAction,
+}
+
+export default connect(null, mapDispatchToProps)(SignIn);

@@ -26,6 +26,11 @@ export interface ICartItem {
     quantity: number,
 };
 
+export interface IGlobalCartState {
+    items: ICartItem[],
+    total: number,
+};
+
 export interface IUser {
     _id?: string,
     firstname: string,
@@ -50,6 +55,6 @@ export interface IOrder {
 
 export interface IGlobalState {
     auth: IGlobalAuthState,
-    cart: ICartItem[],
+    cart: IGlobalCartState,
     orders: IOrder[],
 };

@@ -1,12 +1,24 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { authSignUp } from '../../api/auth';
-import { queryClient } from '../../config/queryClient';
 import './AuthComp.css'
-import { useDispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import { loginAction } from '../../reducers/auth/authActions';
+import { getCart } from '../../api/cart';
+import { getOrders } from '../../api/order';
+import { setCartAction } from '../../reducers/cart/cartActions';
+import { setOrdersAction } from '../../reducers/order/orderActions';
 
-const SignUp = ({ setnavIndex }: any) => {
+interface ISignUpProps {
+    // Global State props
+    loginDispatch: Function,
+    setCartDispatch: Function,
+    setOrdersDispatch: Function,
+    // Local State props
+    setnavIndex: Function,
+};
+
+const SignUp = ({ setnavIndex, loginDispatch, setCartDispatch, setOrdersDispatch }: ISignUpProps) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
@@ -21,34 +33,44 @@ const SignUp = ({ setnavIndex }: any) => {
     const [cpassword, setCPassword] = useState('');
     const [failmsg, setFailMsg] = useState('');
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     const handleSignUp = async () => { 
        if((firstname==='')||(lastname==='')||(username==='')||(phone==='')||(email==='')||(password==='')||(cpassword==='')) 
         setFailMsg('Please fill all the fields');
        else if ( password !== cpassword) setFailMsg('Password and Confirm Password donot match');
-       else
-       {
+       else {
            const newUser = {
                firstname: firstname,
                lastname: lastname,
                username: username,
                phone: phone,
                email: email,
-               password: password
-           };
-           const { isSuccess, error, user } = await authSignUp(newUser);
-            if(isSuccess) {
-                dispatch(loginAction({
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                }));
-                // window.location = '/'; // needed to reload to re render everything before, but now with react-query, not required
-                queryClient.invalidateQueries('cart');
-                queryClient.invalidateQueries('order');
+               password: password,
+               cart: [],
+            };
+            const authRet = await authSignUp(newUser);
+            if(authRet.isSuccess && authRet.user) {
+                const cartRet = await getCart();
+                const ordersRet = await getOrders();
+
+                if(!cartRet.isSuccess) console.log("Error while getting cart: ", cartRet.error);
+                if(!ordersRet.isSuccess) console.log("Error while getting cart: ", ordersRet.error);
+                // for now just displaying errors on console...
+                // the frontend app won't break, because epty arrays are returned on error, so no actual error is thrown
+
+                loginDispatch({
+                    firstname: authRet.user.firstname,
+                    lastname: authRet.user.lastname,
+                });
+                
+                setCartDispatch(cartRet.cart);
+                setOrdersDispatch(ordersRet.orders);
+
                 navigate('/');
             }
-           else setFailMsg(error);
+            else {
+                setFailMsg(authRet.error ? authRet.error : "");
+            }
        }
     }
 
@@ -81,4 +103,10 @@ const SignUp = ({ setnavIndex }: any) => {
     )
 }
 
-export default SignUp;
+const mapDispatchToProps = {
+    loginDispatch: loginAction,
+    setCartDispatch: setCartAction,
+    setOrdersDispatch: setOrdersAction,
+  }
+  
+  export default connect(null, mapDispatchToProps)(SignUp);

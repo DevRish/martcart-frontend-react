@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react'
+import { useState, useEffect } from 'react'
 import SignUp from '../../components/AuthComp/SignUp';
 import SignIn from '../../components/AuthComp/SignIn';
 import AuthImg from './../../assets/AuthImages/authImg.svg';

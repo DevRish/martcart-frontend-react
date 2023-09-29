@@ -1,4 +1,4 @@
-import { ICartItem, IAction, IProduct } from "../../types/coreTypes"
+import { ICartItem, IAction, IProduct, IGlobalCartState } from "../../types/coreTypes"
 
 export enum cartActionTypes {
     ADD_ITEM, // add 1 instance of an item to cart
@@ -20,9 +20,9 @@ export function removeItemFromCartAction(productId: string): IAction {
     }
 }
 
-export function setCartAction(newCart: ICartItem[]): IAction {
+export function setCartAction(newCartState: IGlobalCartState): IAction {
     return {
         type: cartActionTypes.SET_CART,
-        payload: newCart,
+        payload: newCartState,
     }
 }

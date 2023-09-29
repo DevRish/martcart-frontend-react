@@ -13,7 +13,7 @@ export const getUserData = async () : Promise<IUserFuncReturn> => {
         }
     } 
     catch (error) { 
-        console.log('Error while getting cart : ');
+        console.log('Error while getting user : ');
         console.log(error);
         return ({ isSuccess: false, user: null, error: "Something went wrong" });
     }

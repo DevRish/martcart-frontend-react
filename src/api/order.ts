@@ -1,8 +1,5 @@
-import { SERVER_URL } from "../config/keys";
 import { IOrderApiReturn, IOrderDetails, IOrderFuncReturn } from "../types/apiUtilTypes";
 import axiosClient from "../config/axiosClient";
-
-const BASE_URL = `${SERVER_URL}/api`;
 
 export const getOrders = async () : Promise<IOrderFuncReturn> => {
     try 
@@ -16,7 +13,7 @@ export const getOrders = async () : Promise<IOrderFuncReturn> => {
         }
     } 
     catch (error) { 
-        console.log('Error while getting cart : ');
+        console.log('Error while getting orders : ');
         console.log(error);
         return ({ isSuccess: false, orders: [], error: "Something went wrong", order: null });
     }
@@ -34,7 +31,7 @@ export const addNewOrder = async (orderDetails: IOrderDetails) => {
         }
     } 
     catch (error) { 
-        console.log('Error while getting cart : ');
+        console.log('Error while adding order : ');
         console.log(error);
         return ({ isSuccess: false, orders: [], error: "Something went wrong", order: null });
     }

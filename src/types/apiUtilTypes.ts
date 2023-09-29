@@ -1,4 +1,4 @@
-import { ICartItem, IOrder, IProduct, IUser } from "./coreTypes"
+import { ICartItem, IGlobalCartState, IOrder, IProduct, IUser } from "./coreTypes"
 
 export interface IAuthApiReturn {
     message: string,
@@ -27,7 +27,7 @@ export interface ICartFuncReturn {
     isSuccess: boolean,
     error: string | null,
     product: IProduct | null,
-    cart: ICartItem[],
+    cart: IGlobalCartState,
 };
 
 export interface IOrderApiReturn {

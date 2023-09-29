@@ -1,12 +1,18 @@
 import { configureStore } from "@reduxjs/toolkit";
-import rootReducer, { IGlobalState } from "./reducers/rootReducer";
+import rootReducer from "./reducers/rootReducer";
 import logger from "redux-logger";
+import { IGlobalState } from "./types/coreTypes";
 
 const preloadedState: IGlobalState = {
     auth: {
         isLoggedIn: false,
         user: null,
-    }
+    },
+    cart: {
+        items: [],
+        total: 0,
+    },
+    orders: [],
 };
 
 const store = configureStore({
