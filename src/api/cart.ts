@@ -1,106 +1,74 @@
-import { getAllProducts } from "./product";
-import { SERVER_URL } from "../config/keys";
+import axiosClient from "../config/axiosClient";
+import { ICartApiReturn, ICartFuncReturn } from "../types/apiUtilTypes";
 
-const BASE_URL = `${SERVER_URL}/api`;
-
-export const getCart = async (currUser) => {
+export const getCart = async () : Promise<ICartFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/cart/getCart`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify({ currUser })
-        });
-        const data = await res.json();
-        const productData = await getAllProducts();
-        if(res.status === 200)
-        {
-            let dataArr = [];
-            // console.log(data);
-            for(let x in data.cart)
-            {
-                // console.log(data.cart[x]);
-                let item = productData.products.find(product => { return product._id === data.cart[x].prodid });
-                item = { ...item, quantity: data.cart[x].quantity };
-                // console.log(product);
-                dataArr.push(item)
-            }
-            return dataArr.reverse();
-        }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return [];
-        };
-    } 
-    catch (error) { console.log('Error while getting cart : '+error) }
-}
-
-export const addCartItem = async (itemdata) => {
-    try 
-    {
-        const res = await fetch(`${BASE_URL}/cart/addItem`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(itemdata)
-        })
-        const data = await res.json();
+        const res = await axiosClient.get("/cart/getCart");
+        const data: ICartApiReturn = res.data;
         if(res.status === 200) {
-            // if(data.hasOwnProperty('message')) console.log(data.message);
-            return;
-        }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return ;
+            return ({ isSuccess: true, cart: (data.cart) ? data.cart : [], error: null, product: null });
+        } else {
+            return ({ isSuccess: false, cart: [], error: data.message, product: null });
         }
     } 
-    catch (error) { console.log('Error while adding item to cart : ' + error ) }
+    catch (error) { 
+        console.log('Error while getting cart : ');
+        console.log(error);
+        return ({ isSuccess: false, cart: [], error: "Something went wrong", product: null });
+    }
 }
 
-export const removeCartItem = async (itemdata) => {
+export const addCartItem = async (productId: string) : Promise<ICartFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/cart/removeItem`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(itemdata)
-        })
-        const data = await res.json();
+        const res = await axiosClient.post("/cart/addItem", { productId });
+        const data: ICartApiReturn = res.data;
         if(res.status === 200) {
-            // if(data.hasOwnProperty('message')) console.log(data.message);
-            return;
-        }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return ;
+            return ({ isSuccess: true, product: (data.product) ? data.product : null, error: null, cart: [] });
+        } else {
+            return ({ isSuccess: false, product: null, error: data.message, cart: [] });
         }
     } 
-    catch (error) { console.log('Error while removing item from cart : ' + error) }
+    catch (error) { 
+        console.log('Error while adding item to cart : ');
+        console.log(error);
+        return ({ isSuccess: false, product: null, cart: [], error: "Something went wrong" });
+    }
 }
 
-export const emptyCart = async (currUser) => {
+export const removeCartItem = async (productId: string) : Promise<ICartFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/cart/emptyCart`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify({ currUser })
-        });
-        const data = await res.json();
-        if(res.status === 200)
-        {
-            console.log(data.message);
+        const res = await axiosClient.post("/cart/removeItem", { productId });
+        const data: ICartApiReturn = res.data;
+        if(res.status === 200) {
+            return ({ isSuccess: true, product: (data.product) ? data.product : null, error: null, cart: [] });
+        } else {
+            return ({ isSuccess: false, product: null, error: data.message, cart: [] });
         }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-        };
     } 
-    catch (error) { console.log('Error while emptying cart : '+error) }
+    catch (error) { 
+        console.log('Error while removing item from cart : ');
+        console.log(error);
+        return ({ isSuccess: false, product: null, cart: [], error: "Something went wrong" });
+    }
+}
+
+export const emptyCart = async () : Promise<ICartFuncReturn> => {
+    try 
+    {
+        const res = await axiosClient.post("/cart/emptyCart");
+        const data: ICartApiReturn = res.data;
+        if(res.status === 200) {
+            return ({ isSuccess: true, product: null, error: null, cart: [] });
+        } else {
+            return ({ isSuccess: false, product: null, error: data.message, cart: [] });
+        }
+    } 
+    catch (error) { 
+        console.log('Error while emptying cart : ');
+        console.log(error);
+        return ({ isSuccess: false, product: null, cart: [], error: "Something went wrong" });
+    }
 }

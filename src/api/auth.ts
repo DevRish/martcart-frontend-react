@@ -1,77 +1,57 @@
-import { SERVER_URL } from "../config/keys";
+import { ILoginCredentials, IAuthFuncReturn, IAuthApiReturn } from "../types/apiUtilTypes";
+import { IUser } from "../types/coreTypes";
+import axiosClient from "./../config/axiosClient";
 
-const BASE_URL = `${SERVER_URL}/api`;
-
-export const checkLoggedIn = async () => {
+export const authLogIn = async (credentials: ILoginCredentials) : Promise<IAuthFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/auth/checkLogged`);
-        const data = await res.json();
-        if(res.status === 200) return ({ isLoggedIn: true, username: data.user.username });
-        else if(res.status === 404) return ({ isLoggedIn: false, username: '' });
-        else {
-            console.log('Failed to fetch auth status');
-            return ({ isLoggedIn: false, username: '' });
+        const res = await axiosClient.post("/auth/login", credentials);
+        const data: IAuthApiReturn = res.data;
+        if(res.status === 200) {
+            axiosClient.defaults.headers.common["Authorization"] = "Bearer " + data.token;
+            return ({ isSuccess: true, error: null, user: (data.user) ? data.user : null });
+        } else {
+            return ({ isSuccess: false, error: data.message, user: null });
         }
-    } 
-    catch (error) { console.log('Error while checking logged in or not : ' + error) }
+    } catch (error) { 
+        console.log('Error in login : ' + error);
+        return { isSuccess: false, error: "Something went wrong", user: null };
+    }
 }
 
-export const authLogIn = async (credentials) => {
-    try 
-    {
-        const res = await fetch(`${BASE_URL}/auth/login`, {
-            method: 'POST',
-            body: JSON.stringify(credentials),
-            headers: {
-                'Content-Type' : 'application/json'
-            }
-        })
-        if(res.status === 200) return ({ isSuccess: true, error: null });
-        else
-        {
-            const data = await res.json();
-            return ({ isSuccess: false, error: data.message });
-        }
-    } catch (error) { console.log('Error in login : ' + error) }
-}
-
-export const authSignUp = async (newUser) => {
+export const authSignUp = async (newUser: IUser) : Promise<IAuthFuncReturn> => {
     try
     {
-        const res = await fetch(`${BASE_URL}/auth/signup`, {
-            method: 'POST',
-            body: JSON.stringify(newUser),
-            headers: {
-                'Content-Type' : 'application/json'
-            }
-        });
-        if(res.status === 200) return ({ isSuccess: true, error: null });
-        else 
-        {
-            const data = await res.json();
-            if(data.hasOwnProperty('errors'))
-            {
-                for(let error in data.errors.errors)
-                {
-                    return ({ isSuccess: false, error: data.errors.errors[error] });
-                    // returns only first key in the JSON
-                }
-            }
-            if(data.hasOwnProperty('message')) return ({ isSuccess: false, error: data.message });
+        const res = await axiosClient.post("/auth/signup", newUser);
+        const data: IAuthApiReturn = res.data;
+        if(res.status === 200) {
+            axiosClient.defaults.headers.common["Authorization"] = "Bearer " + data.token;
+            return ({ isSuccess: true, error: null, user: (data.user) ? data.user : null });
+        } else {
+            return ({ isSuccess: false, error: data.message, user: null });
         }
     }
-    catch (error) { console.log('Error in signup : ' + error) }
+    catch (error) { 
+        console.log('Error in signup : ' + error);
+        return { isSuccess: false, error: "Something went wrong", user: null };
+    }
 }
 
-export const authLogout = async () => {
+export const authLogout = async () : Promise<IAuthFuncReturn> => {
     try 
     {
-        const res = await fetch(`/api/auth/logout`, {
-            method: 'POST'
-        })
-        if(res.status === 200) return ({ isLoggedOut: true });
-        else return ({ isLoggedOut: false });
+        const res = await axiosClient.post("/auth/logout");
+        const data: IAuthApiReturn = res.data;
+        if(res.status === 200) {
+            axiosClient.defaults.headers.common["Authorization"] = "";
+            return ({ isSuccess: true, error: null, user: null });
+        }
+        else {
+            return ({ isSuccess: false, error: data.message, user: null });
+        }
     } 
-    catch (error) { console.log('Error while logging out : ' + error) }
+    catch (error) { 
+        console.log('Error while logging out : ' + error);
+        return { isSuccess: false, error: "Something went wrong", user: null };
+    }
 }

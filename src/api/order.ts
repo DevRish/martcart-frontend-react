@@ -1,58 +1,41 @@
-import { getAllProducts } from "./product";
 import { SERVER_URL } from "../config/keys";
+import { IOrderApiReturn, IOrderDetails, IOrderFuncReturn } from "../types/apiUtilTypes";
+import axiosClient from "../config/axiosClient";
 
 const BASE_URL = `${SERVER_URL}/api`;
 
-export const getOrderData = async (currUser) => {
+export const getOrders = async () : Promise<IOrderFuncReturn> => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/order/getorderdata`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify({ currUser })
-        });
-        const data = await res.json();
-        const productData = await getAllProducts();
-        if(res.status === 200)
-        {
-            let dataArr = [];
-            for(let x in data.orders)
-            {
-                let product = productData.products.find(obj => { return obj._id === data.orders[x].prodid });
-                let order = {...product, ...(data.orders[x])}
-                dataArr.push(order)
-            }
-            return dataArr.reverse();
-        }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return [];
+        const res = await axiosClient.get("/order/getorderdata");
+        const data: IOrderApiReturn = res.data;
+        if(res.status === 200) {
+            return ({ isSuccess: true, orders: (data.orders) ? data.orders : [], error: null, order: null });
+        } else {
+            return ({ isSuccess: false, orders: [], error: data.message, order: null });
         }
     } 
-    catch (error) { console.log('Error while getting cart : '+error) }
+    catch (error) { 
+        console.log('Error while getting cart : ');
+        console.log(error);
+        return ({ isSuccess: false, orders: [], error: "Something went wrong", order: null });
+    }
 }
 
-export const addNewOrder = async (order) => {
+export const addNewOrder = async (orderDetails: IOrderDetails) => {
     try 
     {
-        const res = await fetch(`${BASE_URL}/order/addOrder`, {
-            method: 'POST',
-            headers: {
-                'Content-Type' : 'application/json'
-            },
-            body: JSON.stringify(order)
-        })
-        const data = await res.json();
+        const res = await axiosClient.post("/order/addOrder", orderDetails);
+        const data: IOrderApiReturn = res.data;
         if(res.status === 200) {
-            // if(data.hasOwnProperty('message')) console.log(data.message);
-            return;
-        }
-        else {
-            if(data.hasOwnProperty('error')) console.log('Request failed with error : '+data.error);
-            return ;
+            return ({ isSuccess: true, orders: [], error: null, order: (data.order) ? data.order : null });
+        } else {
+            return ({ isSuccess: false, orders: [], error: data.message, order: null });
         }
     } 
-    catch (error) { console.log('Error while adding order : ' + error) }
+    catch (error) { 
+        console.log('Error while getting cart : ');
+        console.log(error);
+        return ({ isSuccess: false, orders: [], error: "Something went wrong", order: null });
+    }
 }

@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { authLogIn } from '../../api/auth';
 import { queryClient } from '../../config/queryClient';
 import './AuthComp.css'
+import { useDispatch } from 'react-redux';
+import { loginAction } from '../../reducers/auth/authActions';
 
-const SignIn = ({ setnavIndex }) => {
+const SignIn = ({ setnavIndex }:any) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
@@ -14,6 +16,7 @@ const SignIn = ({ setnavIndex }) => {
     const [password, setPassword] = useState('');
     const [failmsg, setFailMsg] = useState('');
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogIn = async () => { 
        if((username==='')||(password==='')) setFailMsg('Please fill all the fields');
@@ -23,11 +26,16 @@ const SignIn = ({ setnavIndex }) => {
                 username: username,
                 password: password
             }
-            const { isSuccess, error } = await authLogIn(credentials);
-            if(isSuccess) 
-            {
+            const { isSuccess, error, user } = await authLogIn(credentials);
+            if(isSuccess) {
+                dispatch(loginAction({
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                }));
+                
                 // window.location = '/'; // needed to reload to re render everything before, but now with react-query, not required
-                queryClient.invalidateQueries('auth', 'cart', 'order', 'user');
+                queryClient.invalidateQueries('cart');
+                queryClient.invalidateQueries('order');
                 navigate('/');
             }
             else setFailMsg(error);

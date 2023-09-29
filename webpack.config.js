@@ -48,8 +48,8 @@ module.exports = {
             ],
         },
         {
-          test: /\.(png|svg|jpg|gif|pdf)$/,
-          type: 'asset',
+          test: /\\.(png|jp(e*)g|svg|gif|pdf)$/,
+          use: [ 'file-loader' ],
         }
     ]
   },

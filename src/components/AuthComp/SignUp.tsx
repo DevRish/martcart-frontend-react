@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { authSignUp } from '../../api/auth';
 import { queryClient } from '../../config/queryClient';
 import './AuthComp.css'
+import { useDispatch } from 'react-redux';
+import { loginAction } from '../../reducers/auth/authActions';
 
-const SignUp = ({ setnavIndex }) => {
+const SignUp = ({ setnavIndex }: any) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
@@ -19,6 +21,7 @@ const SignUp = ({ setnavIndex }) => {
     const [cpassword, setCPassword] = useState('');
     const [failmsg, setFailMsg] = useState('');
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleSignUp = async () => { 
        if((firstname==='')||(lastname==='')||(username==='')||(phone==='')||(email==='')||(password==='')||(cpassword==='')) 
@@ -34,12 +37,17 @@ const SignUp = ({ setnavIndex }) => {
                email: email,
                password: password
            };
-           const { isSuccess, error } = await authSignUp(newUser);
-           if(isSuccess) 
-           {
-                queryClient.invalidateQueries('auth', 'cart', 'order', 'user');
+           const { isSuccess, error, user } = await authSignUp(newUser);
+            if(isSuccess) {
+                dispatch(loginAction({
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                }));
+                // window.location = '/'; // needed to reload to re render everything before, but now with react-query, not required
+                queryClient.invalidateQueries('cart');
+                queryClient.invalidateQueries('order');
                 navigate('/');
-           }
+            }
            else setFailMsg(error);
        }
     }
