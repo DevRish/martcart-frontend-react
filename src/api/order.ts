@@ -19,7 +19,7 @@ export const getOrders = async () : Promise<IOrderFuncReturn> => {
     }
 }
 
-export const addNewOrder = async (orderDetails: IOrderDetails) => {
+export const addNewOrder = async (orderDetails: IOrderDetails) : Promise<IOrderFuncReturn> => {
     try 
     {
         const res = await axiosClient.post("/order/addOrder", orderDetails);

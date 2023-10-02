@@ -1,46 +1,63 @@
-import { useState } from 'react'
-import { useParams } from 'react-router'
-import { useQuery } from 'react-query';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom'
-import { queryClient } from '../../config/queryClient';
 import { addCartItem } from '../../api/cart';
-import { checkLoggedIn } from '../../api/auth';
-import { getAllProducts } from '../../api/product';
 import Checkout from '../../components/CheckOut/Checkout';
 import Spinner from '../../components/Spinner/Spinner'
 import "./../OrdersPage/MyOrders.css"
 import "./Product.css"
+import { IGlobalState, IProduct } from '../../types/coreTypes';
+import { getProductById } from '../../api/product';
+import { connect } from 'react-redux';
+import { addItemToCartAction } from '../../reducers/cart/cartActions';
 
-const Product = () => {
+interface IProductProps {
+    // Global State Props
+    isLoggedIn: boolean,
+    addItemToCartDispatch: (product: IProduct) => void,
+};
+
+const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
     const [checkoutVis, setCheckoutVis] = useState(false);
-    const productsQuery = useQuery('product', getAllProducts, { initialData: { products: [] } } );
+    
+    const [isLoading, setIsLoading] = useState(false);
+    const [product, setProduct] = useState<IProduct>();
+
+    const { id } = useParams();
+
+    const getProductData = async () => {
+        try {
+            const productFuncRet = await getProductById(String(id));
+            if(productFuncRet.isSuccess && productFuncRet.product) {
+                setProduct(productFuncRet.product);
+            } else {
+                throw new Error("Unable to fetch product data");
+            }
+        } catch(error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
     let navigate = useNavigate();
 
-    const { id } = useParams() ;
-    var product = {};
-
-    if(productsQuery.isFetched)
-    {
-        product = productsQuery.data.products.find(product => { return product._id === id});
-        // console.log(product);
-    }
-
-    const authQuery = useQuery('auth', checkLoggedIn, { initialData: { username: '', isLoggedIn: false } } );
+    useEffect(() => {
+        setIsLoading(true);
+        getProductData();
+    }, [product]);
 
     const addToCart = () => {
-        addCartItem({
-            prodid: id,
-            currUser: authQuery.data.username
-        });
-        queryClient.invalidateQueries('cart');
+        addCartItem(String(id));
+        if(product) {
+            addItemToCartDispatch(product);
+        }
         navigate('/cart');
     }
 
     return (
         <>
         {
-            productsQuery.isFetched ?
+            (!isLoading && product) ?
             <div className="container">
                 <div className="orderCard">
                     <div className="orderImg" style={{
@@ -50,7 +67,7 @@ const Product = () => {
                         <h4>{product.prod_name}</h4>
                         <div style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
                             <p>
-                                <b> Rs {parseInt((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
+                                <b> Rs {Math.ceil((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
                                 <span style={{
                                     fontSize: `14px`,
                                     textDecoration: `line-through`
@@ -61,7 +78,7 @@ const Product = () => {
                             <h5 style={{ fontWeight: "normal" }}>Free Delivery</h5>
                         </div>
                         {
-                            (authQuery.data.isLoggedIn) ?
+                            (isLoggedIn) ?
                             <div className='prodbtns'>
                                 <button onClick={() => setCheckoutVis(!checkoutVis)} style={{ marginRight: "2rem" }}>Buy Now</button>
                                 <button onClick={addToCart}>Add to cart</button>
@@ -82,11 +99,11 @@ const Product = () => {
                     </div>
                 </div>
                 {
-                    (checkoutVis && authQuery.data.isLoggedIn) && 
+                    (checkoutVis && isLoggedIn) && 
                     <Checkout 
                         isCart={false} 
-                        item={product}
-                        price={ parseInt((product.price)*( 1 - (product.discount_percent*0.01))) }
+                        currItemId={String(product._id)}
+                        price={ Math.ceil((product.price)*( 1 - (product.discount_percent*0.01))) }
                     />
                 }
             </div> :
@@ -96,4 +113,14 @@ const Product = () => {
     )
 }
 
-export default Product
+const mapStateToProps = function(state: IGlobalState) {
+  return {
+    isLoggedIn: state.auth.isLoggedIn,
+  }
+}
+
+const mapDispatchToProps = {
+  addItemToCartDispatch: addItemToCartAction,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Product);

@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useQuery } from 'react-query';
 import { useParams } from 'react-router-dom';
 import ProductDeck from '../../components/ProductDeck/ProductDeck';
-import { getAllProducts } from '../../api/product';
+import { getProducts } from '../../api/product';
 import './CategoryPage.css';
 import Spinner from '../../components/Spinner/Spinner';
+import { IProduct } from '../../types/coreTypes';
 
 const CategoryPage = () => {
 
@@ -12,31 +12,47 @@ const CategoryPage = () => {
         window.scrollTo(0,0);
     }, [])
 
-    const [searchText, setSearchText] = useState('');
     const { category } = useParams();
-    const [productsData, setProductsData] = useState([]);
-    const productsQuery = useQuery('product', getAllProducts, { initialData: { products: [] } } );
+    const [searchText, setSearchText] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [products, setProducts] = useState<IProduct[]>([]);
+    const [shownProducts, setShownProducts] = useState<IProduct[]>([]);
+
+    const getProductData = async () => {
+        try {
+            const productFuncRet = await getProducts();
+            if(productFuncRet.isSuccess && productFuncRet.products) {
+                setProducts(productFuncRet.products);
+            } else {
+                throw new Error("Unable to fetch products data");
+            }
+        } catch(error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     const filterData = () => {
-        // console.log(searchText);
-        // if(productsQuery.isFetched)
-        if(productsQuery.data.products.length !== 0)
-        {
-            if(searchText === '') 
-            {
-                if(category) setProductsData(productsQuery.data.products.filter((product) => product.tags.includes(category)) );
-                else setProductsData(productsQuery.data.products);
+        if(products.length !== 0) {
+            if(searchText === '') {
+                if(category) setShownProducts(products.filter((product) => product.tags.includes(category)) );
+                else setShownProducts(products);
             }
-            else
-            {
-                setProductsData(productsQuery.data.products.filter((product) => product.prod_name.toLowerCase().includes(searchText.toLowerCase())) );
+            else {
+                setShownProducts(products.filter((product) => product.prod_name.toLowerCase().includes(searchText.toLowerCase())) );
             }
         }
     }
 
     useEffect(() => {
         filterData();
-    }, [searchText, productsQuery])
+    }, [searchText, products]);
+
+    useEffect(() => {
+        setIsLoading(true);
+        getProductData();
+    }, [products]);
 
     return (
         <div className="container">
@@ -51,12 +67,10 @@ const CategoryPage = () => {
                 }}
                 onChange={(e) => setSearchText(e.target.value)}
             />
-            {/* { console.log(productsData) } */}
-            {/* { console.log(productsQuery.data.products) } */}
             {
-                productsQuery.isFetched ? 
-                productsData.length !== 0 ?
-                <ProductDeck productData={productsData} /> :
+                (!isLoading) ? 
+                shownProducts.length !== 0 ?
+                <ProductDeck productData={shownProducts} /> :
                 <h1>No results found for your search</h1>
                 :
                 <Spinner />

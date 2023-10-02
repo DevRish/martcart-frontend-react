@@ -52,12 +52,14 @@ export interface IOrderDetails {
 export interface IProductApiReturn {
     message: string,
     products?: IProduct[],
+    product?: IProduct,
 };
 
 export interface IProductFuncReturn {
     isSuccess: boolean,
     error: string | null,
     products: IProduct[],
+    product: IProduct | null,
 };
 
 export interface IUserApiReturn {

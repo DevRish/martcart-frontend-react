@@ -1,50 +1,66 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from 'react-query';
 import { getUserData } from '../../api/user';
 import "./Profile.css";
 import Spinner from '../../components/Spinner/Spinner';
-import { authLogout, checkLoggedIn } from '../../api/auth';
-import { queryClient } from '../../config/queryClient';
+import { authLogout } from '../../api/auth';
+import { IUser } from '../../types/coreTypes';
+import { connect } from 'react-redux';
+import { logoutAction } from '../../reducers/auth/authActions';
 
-const Profile = () => {
+interface IProfileProps {
+    // Global State Props
+    logoutDispatch: () => void,
+};
+
+const Profile = ({ logoutDispatch } : IProfileProps) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
-    }, [])
+    }, []);
 
-    let navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+    const [currUser, setCurrUser] = useState<IUser>();
+    const navigate = useNavigate();
 
-    const userQuery = useQuery('user', async () => {
-        const { isLoggedIn, username } = await checkLoggedIn();
-        if(isLoggedIn)
-        {
-            const userdata = await getUserData({ currUser: username });
-            return userdata;
+    const getCurrUserData = async () => {
+        try {
+            const userFuncRet = await getUserData();
+            if(userFuncRet.isSuccess && userFuncRet.user) {
+                setCurrUser(userFuncRet.user);
+            } else {
+                throw new Error("Unable to fetch user data");
+            }
+        } catch(error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
         }
-        else return {};
-    }, { initialData: {} })
+    };
+
+    useEffect(() => {
+        setIsLoading(true);
+        getCurrUserData();
+    }, []);
 
     const logout = async () => {
-        const {isLoggedOut} = await authLogout();
-        if(isLoggedOut) 
-        {
-            queryClient.invalidateQueries('auth', 'cart', 'order', 'user');
+        const authFuncRet = await authLogout();
+        if(authFuncRet.isSuccess) {
+            logoutDispatch();
             navigate('/');
         }
     }
 
     return (
         <>
-        { (!userQuery.isFetched) && <Spinner /> }
+        { (isLoading) && <Spinner /> }
         { 
-            ( userQuery.isFetched && (userQuery.data !== {}) ) &&
+            (!isLoading && currUser) &&
             <div className="container">
-                    {/* {console.log(userQuery)} */}
                     <h2 className='profileHeading'>
-                        Welcome back {userQuery.data.firstname}!
+                        Welcome back {currUser.firstname}!
                     </h2>
-                    <p className='profileParagraph'><b>User Since:</b> {userQuery.data.joinDate.substring(0, 10)} </p>
+                    <p className='profileParagraph'><b>User Since:</b> {currUser.joinDate?.substring(0, 10)} </p>
                     <button className='profileBtn' onClick={logout}>Logout</button>
             </div>
         }
@@ -52,4 +68,8 @@ const Profile = () => {
     )
 }
 
-export default Profile;
+const mapDispatchToProps = {
+  logoutDispatch: logoutAction,
+}
+
+export default connect(null, mapDispatchToProps)(Profile);

@@ -1,18 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "react-query";
-import { queryClient } from "../../config/queryClient";
 import { stateList, cityList } from '../../helpers/locationsList';
 import { getUserData } from "../../api/user";
 import { addNewOrder } from "../../api/order";
-import { checkLoggedIn } from "../../api/auth";
-import { getCart } from "../../api/cart";
 import { emptyCart } from "../../api/cart";
 import Spinner from "../Spinner/Spinner";
 import RazorPay from './../../assets/razorpay.svg';
 import './Checkout.css';
+import { ICartItem, IGlobalCartState, IGlobalState, IOrder, IUser } from "../../types/coreTypes";
+import { connect } from "react-redux";
+import { setCartAction } from "../../reducers/cart/cartActions";
+import { addOrderAction } from "../../reducers/order/orderActions";
 
-const Checkout = ({ item, price, isCart }) => {
+interface ICheckoutProps {
+    // Global State props
+    cart: ICartItem[],
+    setCartDispatch: (newCart: IGlobalCartState) => void,
+    addOrderDispatch: (order: IOrder) => void,
+    // Local State props
+    currItemId: string,
+    price: number,
+    isCart: boolean, // tells whether single item checkout or cart checkout
+};
+
+const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrderDispatch } : ICheckoutProps) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [currUser, setCurrUser] = useState<IUser>();
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
@@ -21,98 +34,79 @@ const Checkout = ({ item, price, isCart }) => {
     const [isEmpty, setIsEmpty] = useState(false);
     let navigate = useNavigate();
 
-    const authQuery = useQuery('auth', checkLoggedIn, { initialData: { username: '', isLoggedIn: false } } );
-    
-    const userQuery = useQuery('user', async () => {
-        const { isLoggedIn, username } = await checkLoggedIn();
-        if(isLoggedIn)
-        {
-            const userdata = await getUserData({ currUser: username });
-            return userdata;
-        }
-        else return {};
-    }, { initialData: {} })
+    useEffect(() => {
+        setIsLoading(true);
+        getCurrUserData();
+    }, [currUser]);
 
-    const cartQuery = useQuery('cart', async () => {
-        const { isLoggedIn, username } = await checkLoggedIn();
-        if(isLoggedIn)
-        {
-            const cartdata = await getCart(username);
-            return cartdata;
+    const getCurrUserData = async () => {
+        try {
+            const userFuncRet = await getUserData();
+            if(userFuncRet.isSuccess && userFuncRet.user) {
+                setCurrUser(userFuncRet.user);
+            } else {
+                throw new Error("Unable to fetch user data");
+            }
+        } catch(error) {
+            console.log(error);
+        } finally {
+            setIsLoading(false);
         }
-        else return [];
-    }, { initialData: [] } )
+    };
 
-    var today = new Date();
-    var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     const addOrder = async () => {
         if((address === '')||(city === '')||(state === '')||(pin === '')||(!payChosen)) setIsEmpty(true);
         else
         {
-            if(isCart) 
-            {
-                // cart query keeps updating as we remove. Keeping it here is risky I guess.
-                // Same for user, lets make things constant
-                const cartFixed = cartQuery.data;
-                const currUser = authQuery.data.username;
-                for(let x in cartFixed)
-                {
-                    const item = cartFixed[x];
-                    await addNewOrder({
-                        prodid: item._id,
-                        date: date,
-                        time: time,
+            if(isCart) {
+                for(let item of cart) {
+                    const orderFuncRet = await addNewOrder({
+                        productId: String(item._id),
                         quantity: item.quantity,
-                        totalPrice: (item.quantity * parseInt((item.price)*( 1 - (item.discount_percent*0.01)))), 
                         address: (address+', '+city+', '+state+' - '+pin),
-                        currUser: currUser
-                    })
-                    
-                    // console.log(item.prod_name+' has quantity '+item.quantity);
-                    // for(let i=1; i<=item.quantity; i++) 
-                    // {
-                    //     removeFromCart(item._id, currUser);
-                    //     console.log('Removed one '+item.prod_name);
-                    // }
+                    });
+                    if(orderFuncRet.order) {
+                        addOrderDispatch(orderFuncRet.order);
+                    }
                 }
-                await emptyCart(currUser);
-                queryClient.invalidateQueries('cart');
-            }
-            else 
-            {
-                addNewOrder({
-                    prodid: item._id,
-                    date: date,
-                    time: time,
-                    quantity: 1,
-                    totalPrice: price, 
-                    address: (address+', '+city+', '+state+' - '+pin),
-                    currUser: authQuery.data.username
+                await emptyCart();
+                setCartDispatch({
+                    items: [],
+                    total: 0,
                 });
+            } else {
+                const orderFuncRet = await addNewOrder({
+                    productId: currItemId,
+                    quantity: 1,
+                    address: (address+', '+city+', '+state+' - '+pin),
+                });
+                if(orderFuncRet.order) {
+                    addOrderDispatch(orderFuncRet.order);
+                }
             }
             navigate('/myorders');
         }
     }
+
     return(
         <>
-            { (!userQuery.isFetched || !authQuery.isFetched || cartQuery.isFetching || cartQuery.isRefetching) && <Spinner /> }
+            { (isLoading) && <Spinner /> }
             {
-                (userQuery.isFetched && cartQuery.isFetched && !cartQuery.isRefetching && authQuery.isFetched) &&
+                (!isLoading && currUser) &&
                 <>
                 <div className="container checkout">
                     <h1>ORDER DETAILS: </h1>
                     <div className="checkout_field">
                         <label htmlFor="checkout_name">Name:</label>
-                        <input id="checkout_name" readOnly value={userQuery.data.firstname + ' ' +userQuery.data.lastname} />
+                        <input id="checkout_name" readOnly value={currUser.firstname + ' ' + currUser.lastname} />
                     </div>
                     <div className="checkout_field">
                         <label htmlFor="checkout_phone">Phone:</label>
-                        <input id="checkout_phone" readOnly value={userQuery.data.phone} />
+                        <input id="checkout_phone" readOnly value={currUser.phone} />
                     </div>
                     <div className="checkout_field">
                         <label htmlFor="checkout_email">Email:</label>
-                        <input id="checkout_email" readOnly value={userQuery.data.email} />
+                        <input id="checkout_email" readOnly value={currUser.email} />
                     </div>
                     <div className="checkout_field">
                         <label htmlFor="checkout_address">Address:</label>
@@ -182,4 +176,15 @@ const Checkout = ({ item, price, isCart }) => {
     )
 }
 
-export default Checkout
+const mapStateToProps = function(state: IGlobalState) {
+  return {
+    cart: state.cart.items,
+  }
+}
+
+const mapDispatchToProps = {
+  setCartDispatch: setCartAction,
+  addOrderDispatch: addOrderAction,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Checkout);

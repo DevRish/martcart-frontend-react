@@ -1,58 +1,49 @@
 import { useEffect } from 'react';
-import { useQuery } from 'react-query';
-import { checkLoggedIn } from '../../api/auth';
-import Spinner from '../../components/Spinner/Spinner';
-import { getOrderData } from '../../api/order';
 import "./MyOrders.css";
+import { IGlobalState, IOrder } from '../../types/coreTypes';
+import { connect } from 'react-redux';
 
-const MyOrders = () => {
+interface IOrderProps {
+    // Global State Props
+    isLoggedIn: boolean,
+    orders: IOrder[],
+};
+
+const MyOrders = ({ isLoggedIn, orders } : IOrderProps) => {
 
     useEffect(() => {
         window.scrollTo(0,0);
-    }, [])
-
-    const authQuery = useQuery('auth', checkLoggedIn, { initialData: { username: '', isLoggedIn: false } } );
-    const orderQuery = useQuery('order', async () => {
-        const { isLoggedIn, username } = await checkLoggedIn();
-        if(isLoggedIn)
-        {
-            const orderdata = await getOrderData(username);
-            return orderdata;
-        }
-        else return [];
-    }, { initialData: [] } )
+    }, []);
 
     return (
         <>
         {
-            (authQuery.data.isLoggedIn) ?
+            (isLoggedIn) ?
             <div className="container">
-                { (orderQuery.isFetching || orderQuery.isRefetching) && <Spinner /> }
                 { 
-                    (!orderQuery.isFetching && !orderQuery.isRefetching && orderQuery.data.length !== 0) && 
+                    (orders.length !== 0) && 
                     <h1 className='mainHeading'>🛍️ Your Orders: 🛍️</h1> 
                 }
                 {
-                    ( !orderQuery.isFetching && !orderQuery.isRefetching && orderQuery.data.length !== 0) ?
-                    orderQuery.data.map((data, index) => {
+                    (orders.length !== 0) ?
+                    orders.map((data, index) => {
                         return (
                             <div className="orderCard" key={index}>
                                 <div className="orderImg" style={{
-                                    backgroundImage: `url(${data.img_url})`
+                                    backgroundImage: `url(${data.productId.img_url})`
                                 }}></div>
                                 <div className="orderDesc">
-                                    <h3 style={{ fontSize: "3rem" }}>{data.prod_name}</h3>
+                                    <h3 style={{ fontSize: "3rem" }}>{data.productId.prod_name}</h3>
                                     <p style={{ fontSize: "2rem" }}>
                                         <b>Quantity:</b> {data.quantity} <br />
                                         <b>Total:</b> Rs {data.totalPrice} <br /> 
-                                        Ordered on <b>{data.date}</b> at <b>{data.time}</b> <br />
+                                        Ordered on <b>{data.orderedAt}</b>
                                         <b>Delivered to address:</b> <br /> {data.address}
                                     </p>
                                 </div>
                             </div>
                         )
                     }) : 
-                    !orderQuery.isFetching && !orderQuery.isRefetching && 
                     <h2 style={{ textAlign: 'center', fontSize: '3rem', paddingTop: '2rem' }}>You have not ordered anything yet</h2>
                 }
             </div> :
@@ -64,4 +55,11 @@ const MyOrders = () => {
     )
 }
 
-export default MyOrders;
+const mapStateToProps = function(state: IGlobalState) {
+  return {
+    isLoggedIn: state.auth.isLoggedIn,
+    orders: state.orders,
+  }
+}
+
+export default connect(mapStateToProps)(MyOrders);
