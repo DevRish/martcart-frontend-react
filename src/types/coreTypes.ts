@@ -1,5 +1,5 @@
 export interface IAction {
-    type: number,
+    type: string,
     payload: any,
 };
 
@@ -22,7 +22,7 @@ export interface IProduct {
 
 export interface ICartItem {
     _id?: string, // since mongodb was assigning ids to these objects too
-    product: IProduct,
+    productId: IProduct,
     quantity: number,
 };
 

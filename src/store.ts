@@ -18,7 +18,7 @@ const preloadedState: IGlobalState = {
 const store = configureStore({
     reducer: rootReducer,
     preloadedState: preloadedState,
-    devTools: process.env.NODE_ENV !== 'production',
+    devTools: true,
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger), // redux-thunk middleware present by default on redux-toolkit
     // enhancers: <no enhancers used yet>
 });

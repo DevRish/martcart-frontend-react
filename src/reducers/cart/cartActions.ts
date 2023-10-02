@@ -1,9 +1,9 @@
 import { ICartItem, IAction, IProduct, IGlobalCartState } from "../../types/coreTypes"
 
 export enum cartActionTypes {
-    ADD_ITEM, // add 1 instance of an item to cart
-    REMOVE_ITEM, // remove 1 instance of an item from cart
-    SET_CART // overwrite cart
+    ADD_ITEM = "ADD_ITEM", // add 1 instance of an item to cart
+    REMOVE_ITEM = "REMOVE_ITEM", // remove 1 instance of an item from cart
+    SET_CART = "SET_CART" // overwrite cart
 };
 
 export function addItemToCartAction(product: IProduct): IAction {

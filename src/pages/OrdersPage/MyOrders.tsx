@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import "./MyOrders.css";
 import { IGlobalState, IOrder } from '../../types/coreTypes';
 import { connect } from 'react-redux';
+import { SERVER_URL } from '../../config/keys';
 
 interface IOrderProps {
     // Global State Props
@@ -30,14 +31,14 @@ const MyOrders = ({ isLoggedIn, orders } : IOrderProps) => {
                         return (
                             <div className="orderCard" key={index}>
                                 <div className="orderImg" style={{
-                                    backgroundImage: `url(${data.productId.img_url})`
+                                    backgroundImage: `url(${SERVER_URL}${data.productId.img_url})`
                                 }}></div>
                                 <div className="orderDesc">
                                     <h3 style={{ fontSize: "3rem" }}>{data.productId.prod_name}</h3>
                                     <p style={{ fontSize: "2rem" }}>
                                         <b>Quantity:</b> {data.quantity} <br />
                                         <b>Total:</b> Rs {data.totalPrice} <br /> 
-                                        Ordered on <b>{data.orderedAt}</b>
+                                        Ordered on <b>{data.orderedAt}</b> <br />
                                         <b>Delivered to address:</b> <br /> {data.address}
                                     </p>
                                 </div>

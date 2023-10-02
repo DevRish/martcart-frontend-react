@@ -1,8 +1,8 @@
 import { IAction, IOrder } from "../../types/coreTypes"
 
 export enum orderActionTypes {
-    ADD_ORDER, // add an order
-    SET_ORDERS // completely modify the orders state
+    ADD_ORDER = "ADD_ORDER", // add an order
+    SET_ORDERS = "SET_ORDERS" // completely modify the orders state
 };
 
 export function addOrderAction(order: IOrder): IAction {

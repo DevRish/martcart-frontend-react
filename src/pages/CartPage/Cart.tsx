@@ -5,6 +5,7 @@ import "./Cart.css";
 import { IGlobalCartState, IGlobalState } from '../../types/coreTypes';
 import { removeItemFromCartAction } from '../../reducers/cart/cartActions';
 import { connect } from 'react-redux';
+import { SERVER_URL } from '../../config/keys';
 
 interface ICartProps {
     // Global State Props
@@ -24,7 +25,7 @@ const Cart = ({ isLoggedIn, cart, removeItemFromCartDispatch } : ICartProps) => 
     const totalFunc = () => {
         let total = 0;
         for(let item of cart.items) {
-            let priceNew = Math.ceil(item.product.price*(1 - item.product.discount_percent*0.01));
+            let priceNew = Math.ceil(item.productId.price*(1 - item.productId.discount_percent*0.01));
             total += (item.quantity * priceNew);
         }
         return total;
@@ -55,11 +56,11 @@ const Cart = ({ isLoggedIn, cart, removeItemFromCartDispatch } : ICartProps) => 
                 {
                     (cart.items.length !== 0) ?
                     cart.items.map((item, index) => {
-                        const product = item.product;
+                        const product = item.productId;
                         return (
                             <div className="cartCard" key={index}>
                                 <div className="cartImg" style={{
-                                    backgroundImage: `url(${product.img_url})`
+                                    backgroundImage: `url(${SERVER_URL}${product.img_url})`
                                 }}></div>
                                 <div className="cartDesc">
                                     <h4>{product.prod_name}</h4>

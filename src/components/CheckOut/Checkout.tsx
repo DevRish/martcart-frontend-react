@@ -37,7 +37,7 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrderDi
     useEffect(() => {
         setIsLoading(true);
         getCurrUserData();
-    }, [currUser]);
+    }, []);
 
     const getCurrUserData = async () => {
         try {

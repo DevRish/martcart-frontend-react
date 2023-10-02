@@ -10,6 +10,7 @@ import { IGlobalState, IProduct } from '../../types/coreTypes';
 import { getProductById } from '../../api/product';
 import { connect } from 'react-redux';
 import { addItemToCartAction } from '../../reducers/cart/cartActions';
+import { SERVER_URL } from '../../config/keys';
 
 interface IProductProps {
     // Global State Props
@@ -44,7 +45,7 @@ const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
     useEffect(() => {
         setIsLoading(true);
         getProductData();
-    }, [product]);
+    }, []);
 
     const addToCart = () => {
         addCartItem(String(id));
@@ -61,7 +62,7 @@ const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
             <div className="container">
                 <div className="orderCard">
                     <div className="orderImg" style={{
-                        backgroundImage: `url(${product.img_url})`
+                        backgroundImage: `url(${SERVER_URL}${product.img_url})`
                     }}></div>
                     <div className="orderDesc">
                         <h4>{product.prod_name}</h4>

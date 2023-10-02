@@ -52,7 +52,7 @@ const CategoryPage = () => {
     useEffect(() => {
         setIsLoading(true);
         getProductData();
-    }, [products]);
+    }, []);
 
     return (
         <div className="container">
@@ -70,7 +70,7 @@ const CategoryPage = () => {
             {
                 (!isLoading) ? 
                 shownProducts.length !== 0 ?
-                <ProductDeck productData={shownProducts} /> :
+                <ProductDeck products={shownProducts} /> :
                 <h1>No results found for your search</h1>
                 :
                 <Spinner />
