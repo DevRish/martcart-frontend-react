@@ -32,7 +32,7 @@ const Home = () => {
   useEffect(() => {
       setIsLoading(true);
       getProductData();
-  }, [products]);
+  }, []);
 
   let FootwearData : IProduct[] = [];
   let FashionData : IProduct[] = [];
@@ -50,10 +50,10 @@ const Home = () => {
     {
       (!isLoading) ?
       <>
-      <Collection category="Shoes" catData={FootwearData.slice(0,3)} catUrl="/search" />
-      <Collection category="Fashion" catData={FashionData.slice(0,3)} catUrl="/search" />
-      <Collection category="Winterwear" catData={WinterwearData.slice(0,3)} catUrl="/search" />
-      <Collection category="Technology" catData={ElectronicsData.slice(0,3)} catUrl="/search" />
+      <Collection category="Shoes" products={FootwearData.slice(0,3)} url="/search" />
+      <Collection category="Fashion" products={FashionData.slice(0,3)} url="/search" />
+      <Collection category="Winterwear" products={WinterwearData.slice(0,3)} url="/search" />
+      <Collection category="Technology" products={ElectronicsData.slice(0,3)} url="/search" />
       </> :
       <Spinner />
     }

@@ -1,14 +1,18 @@
-import React from 'react'
+import { IProduct } from '../../types/coreTypes'
 import ProductCard from '../ProductCard/ProductCard'
 import './ProductDeck.css'
 
-const ProductDeck = ({ productData }) => {
+interface IProductDeckProps {
+  products: IProduct[],
+};
+
+const ProductDeck = ({ products } : IProductDeckProps) => {
   return (
     <div className="grid">
         {
-            productData.map((data, index) => {
+            products.map((product, index) => {
                 return (
-                    <ProductCard cardData={data} key={index} />
+                    <ProductCard product={product} key={index} />
                 )
             })
         }

@@ -1,25 +1,30 @@
 import { Link } from 'react-router-dom'
 import './ProductCard.css'
 import { SERVER_URL } from '../../config/keys'
+import { IProduct } from '../../types/coreTypes'
 
-const ProductCard = ({ cardData }) => {
+interface IProductCardProps {
+    product: IProduct
+};
+
+const ProductCard = ({ product } : IProductCardProps) => {
   return (
-    <Link to={"/product/"+cardData._id} className="productCard" style={{
+    <Link to={"/product/"+product._id} className="productCard" style={{
         textDecoration: "none",
         color: "black"
     }}>
         <div className="productCardImg" style={{
-            backgroundImage: `url(${SERVER_URL}${cardData.img_url})`
+            backgroundImage: `url(${SERVER_URL}${product.img_url})`
         }}></div>
         <div className="productCardDesc">
-            <h4>{cardData.prod_name}</h4>
+            <h4>{product.prod_name}</h4>
             <p>
-                <b> Rs {parseInt((cardData.price)*( 1 - (cardData.discount_percent*0.01)))}  </b>
+                <b> Rs {Math.ceil((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
                 <span style={{
                     fontSize: `14px`,
                     textDecoration: `line-through`
-                }}>{cardData.price}</span> 
-                ({cardData.discount_percent}% off)
+                }}>{product.price}</span> 
+                ({product.discount_percent}% off)
             </p>
             <h5 style={{ fontWeight: "normal" }}>⭐⭐⭐⭐⭐ 5.0</h5>
             <h5 style={{ fontWeight: "normal" }}>Free Delivery</h5>
@@ -28,4 +33,4 @@ const ProductCard = ({ cardData }) => {
   )
 }
 
-export default ProductCard
+export default ProductCard;

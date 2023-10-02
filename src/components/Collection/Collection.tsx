@@ -1,21 +1,27 @@
-import React from 'react';
 import { Link } from "react-router-dom";
 import './Collection.css';
 import ProductCard from '../ProductCard/ProductCard';
+import { IProduct } from "../../types/coreTypes";
 
-const Collection = ({ category, catData, catUrl }) => {
+interface ICollectionProps {
+    category: string,
+    products: IProduct[];
+    url: string,
+};
+
+const Collection = ({ category, products, url } : ICollectionProps) => {
     return (
         <div className="container">
             <h1 className="mainHeading">Best offers on {category}</h1>
             <div className="grid">
                 {
-                    catData.map((product) => {
+                    products.map((product) => {
                         return (
-                            <ProductCard cardData={product} key={product.id} />
+                            <ProductCard product={product} key={product._id} />
                         )
                     })
                 }
-                <div className="categoryCardLast"><Link to={catUrl}><i className="fas fa-arrow-right"></i></Link></div>
+                <div className="categoryCardLast"><Link to={url}><i className="fas fa-arrow-right"></i></Link></div>
             </div>
         </div>
     )
