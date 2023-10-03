@@ -7,6 +7,6 @@ export default function rootReducer(state: any = {}, action: IAction): IGlobalSt
     return {
         auth: authReducer(state.auth, action),
         cart: cartReducer(state.cart, action),
-        orders: orderReducer(state.order, action),
+        orders: orderReducer(state.orders, action),
     }
 };

@@ -10,20 +10,20 @@ import './Checkout.css';
 import { ICartItem, IGlobalCartState, IGlobalState, IOrder, IUser } from "../../types/coreTypes";
 import { connect } from "react-redux";
 import { setCartAction } from "../../reducers/cart/cartActions";
-import { addOrderAction } from "../../reducers/order/orderActions";
+import { addOrdersAction } from "../../reducers/order/orderActions";
 
 interface ICheckoutProps {
     // Global State props
     cart: ICartItem[],
     setCartDispatch: (newCart: IGlobalCartState) => void,
-    addOrderDispatch: (order: IOrder) => void,
+    addOrdersDispatch: (orders: IOrder[]) => void,
     // Local State props
     currItemId: string,
     price: number,
     isCart: boolean, // tells whether single item checkout or cart checkout
 };
 
-const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrderDispatch } : ICheckoutProps) => {
+const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersDispatch } : ICheckoutProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [currUser, setCurrUser] = useState<IUser>();
     const [address, setAddress] = useState('');
@@ -59,17 +59,17 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrderDi
         else
         {
             if(isCart) {
+                const newOrders: IOrder[] = [];
                 for(let item of cart) {
                     const orderFuncRet = await addNewOrder({
-                        productId: String(item._id),
+                        productId: String(item.productId._id),
                         quantity: item.quantity,
                         address: (address+', '+city+', '+state+' - '+pin),
                     });
-                    if(orderFuncRet.order) {
-                        addOrderDispatch(orderFuncRet.order);
-                    }
+                    if(orderFuncRet.order) newOrders.push(orderFuncRet.order);
                 }
                 await emptyCart();
+                addOrdersDispatch(newOrders);
                 setCartDispatch({
                     items: [],
                     total: 0,
@@ -81,7 +81,7 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrderDi
                     address: (address+', '+city+', '+state+' - '+pin),
                 });
                 if(orderFuncRet.order) {
-                    addOrderDispatch(orderFuncRet.order);
+                    addOrdersDispatch([orderFuncRet.order]);
                 }
             }
             navigate('/myorders');
@@ -184,7 +184,7 @@ const mapStateToProps = function(state: IGlobalState) {
 
 const mapDispatchToProps = {
   setCartDispatch: setCartAction,
-  addOrderDispatch: addOrderAction,
+  addOrdersDispatch: addOrdersAction,
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Checkout);
