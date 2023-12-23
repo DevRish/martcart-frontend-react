@@ -1,17 +1,20 @@
-const path = require('path');
-const dotenv = require('dotenv');
-const webpack = require('webpack');
-const { EsbuildPlugin } = require('esbuild-loader'); // minifier
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+import webpack from 'webpack';
+import { EsbuildPlugin } from 'esbuild-loader'; // minifier
+import HtmlWebpackPlugin from 'html-webpack-plugin';
 
 const env = dotenv.config().parsed;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const envKeys = Object.keys(env).reduce((prev, next) => {
   prev[`process.env.${next}`] = JSON.stringify(env[next]);
   return prev;
 }, {});
 
-module.exports = {
+const config = {
   entry: './src/index.tsx',
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -77,3 +80,5 @@ module.exports = {
     ]        
   },
 };
+
+export default config;

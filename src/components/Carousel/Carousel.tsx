@@ -1,9 +1,36 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Carousel.css';
-import { colorSchemes } from '../../utils/CarouselData';
 import { IEvent } from '../../types/coreTypes';
 import { STATIC_URL } from '../../config/keys';
+
+const colorSchemes = [
+    {
+        color_light: "#9C4EBE",
+        color_dark: "#230033",
+        btn_color: "#E27856",
+    },
+    {
+        color_light: "#FF7191",
+        color_dark: "#C60E38",
+        btn_color: "#005165",
+    },
+    {
+        color_light: "#71ECFF",
+        color_dark: "#0091A7",
+        btn_color: "#A72F68",
+    },
+    {
+        color_light: "#53F0E3",
+        color_dark: "#009286",
+        btn_color: "#344B48",
+    },
+    {
+        color_light: "#FFA3A1",
+        color_dark: "#B00400",
+        btn_color: "#230033",
+    }
+]
 
 const Carousel = ({ eventData } : { eventData: IEvent[] }) => {
     const [currCaroEle, setcurrCaroEle] = useState(0);

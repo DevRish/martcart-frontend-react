@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "./src/index.tsx",
+  "type": "module",
   "scripts": {
-    "dev": "webpack serve --mode development"
+    "start": "webpack serve --mode development",
+    "build": "webpack",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "keywords": [],
   "author": "",
@@ -29,16 +32,23 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/redux-logger": "^3.0.9",
     "@types/universal-cookie": "^3.0.0",
-    "css-loader": "^6.8.1",
     "dotenv": "^16.3.1",
+    "redux-logger": "^3.0.6",
+    "typescript": "^5.2.2",
+    
+    "@typescript-eslint/eslint-plugin": "^6.14.0",
+    "@typescript-eslint/parser": "^6.14.0",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "css-loader": "^6.8.1",
     "esbuild-loader": "^4.0.2",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
-    "redux-logger": "^3.0.6",
-    "style-loader": "^3.3.3",
-    "typescript": "^5.2.2",
-    "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1"
+    "style-loader": "^3.3.3"
   }
 }
