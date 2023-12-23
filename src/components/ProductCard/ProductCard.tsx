@@ -5,7 +5,7 @@ import { STATIC_URL } from '../../config/keys'
 
 interface IProductCardProps {
     product: IProduct
-};
+}
 
 const ProductCard = ({ product } : IProductCardProps) => {
   let stars = "", dots = "";
