@@ -3,7 +3,15 @@ import { getProducts } from '../../api/product'
 import Spinner from '../../components/Spinner/Spinner'
 import Carousel from '../../components/Carousel/Carousel'
 import Collection from '../../components/Collection/Collection'
-import { IProduct } from '../../types/coreTypes'
+import { IEvent, IProduct } from '../../types/coreTypes'
+import { getCategories } from '../../api/category'
+import { getEvents } from '../../api/event'
+
+interface IProductData {
+  category: string,
+  itemCount: number,
+  products: IProduct[]
+}
 
 const Home = () => {
 
@@ -12,15 +20,39 @@ const Home = () => {
   }, []);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [products, setProducts] = useState<IProduct[]>([]);
+  const [productData, setProductData] = useState<IProductData[]>([]);
+  const [eventData, setEventData] = useState<IEvent[]>([]);
 
   const getProductData = async () => {
       try {
-          const productFuncRet = await getProducts();
-          if(productFuncRet.isSuccess && productFuncRet.products) {
-              setProducts(productFuncRet.products);
+
+          const tempProductData: IProductData[] = [];
+          const categoryFuncRet = await getCategories();
+          if(categoryFuncRet.isSuccess && categoryFuncRet.categories) {
+              for(const category of categoryFuncRet.categories) {
+                const productFuncRet = await getProducts({
+                  categoryId: category._id,
+                  page: 1,
+                  limit: 3,
+                });
+                if(productFuncRet.isSuccess && productFuncRet.products && (productFuncRet.products.length > 0)) {
+                  tempProductData.push({
+                    category: category.name,
+                    itemCount: category.itemCount,
+                    products: productFuncRet.products
+                  });
+                }
+              }
+              setProductData(tempProductData);
           } else {
-              throw new Error("Unable to fetch products data");
+              console.error("Unable to fetch products data");
+          }
+
+          const eventFuncRet = await getEvents();
+          if(eventFuncRet.isSuccess && eventFuncRet.events) {
+              setEventData(eventFuncRet.events);
+          } else {
+              console.error("Unable to fetch products data");
           }
       } catch(error) {
           console.log(error);
@@ -34,26 +66,23 @@ const Home = () => {
       getProductData();
   }, []);
 
-  let FootwearData : IProduct[] = [];
-  let FashionData : IProduct[] = [];
-  let WinterwearData : IProduct[] = [];
-  let ElectronicsData : IProduct[] = [];
-  if(!isLoading) {
-    FootwearData = products.filter((product) => product.tags.includes("shoe"));
-    FashionData = products.filter((product) => product.tags.includes("fashion"));
-    WinterwearData = products.filter((product) => product.tags.includes("winterwear"));
-    ElectronicsData = products.filter((product) => product.tags.includes("technology"));
-  }
   return (
     <>
-    <Carousel />
     {
       (!isLoading) ?
       <>
-      <Collection category="Shoes" products={FootwearData.slice(0,3)} url="/search" />
-      <Collection category="Fashion" products={FashionData.slice(0,3)} url="/search" />
-      <Collection category="Winterwear" products={WinterwearData.slice(0,3)} url="/search" />
-      <Collection category="Technology" products={ElectronicsData.slice(0,3)} url="/search" />
+      {
+        (productData.length > 0) ?
+        <>
+          <Carousel eventData={eventData} />
+          {
+            productData.map((data) => {
+              return <Collection category={data.category} products={data.products} url="/search" />
+            })
+          }
+        </> :
+        <h2>No products to display</h2>
+      }
       </> :
       <Spinner />
     }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { stateList, cityList } from '../../helpers/locationsList';
+import { stateList, cityList } from '../../utils/locationsList';
 import { getUserData } from "../../api/user";
 import { addNewOrder } from "../../api/order";
 import { emptyCart } from "../../api/cart";

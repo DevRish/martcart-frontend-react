@@ -11,13 +11,37 @@ export interface IGlobalAuthState {
     } | null,
 };
 
+export interface ICategory {
+    _id?: string,
+    name: string,
+    itemCount: number,
+    tagLines: string[],
+};
+
+export interface IEvent {
+    _id?: string,
+    imagePath: string,
+    tagLines: string[],
+    ctaLink: string
+};
+
 export interface IProduct {
     _id?: string,
-    prod_name: string,
-    img_url: string,
-    price: number,
-    discount_percent: number,
-    tags: [string],
+    name: string,
+    currentPrice: number,
+    originalPrice: number,
+    rating?: number,
+    category: ICategory | string,
+    soldBy: ICategory | string,
+    imagePath: string,
+    choices: [{
+        name: string,
+        values: string[]
+    }],
+    specifications: [{
+        name: string,
+        value: string
+    }],
 };
 
 export interface ICartItem {

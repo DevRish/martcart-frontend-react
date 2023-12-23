@@ -1,33 +1,53 @@
 import { Link } from 'react-router-dom'
 import './ProductCard.css'
-import { SERVER_URL } from '../../config/keys'
 import { IProduct } from '../../types/coreTypes'
+import { STATIC_URL } from '../../config/keys'
 
 interface IProductCardProps {
     product: IProduct
 };
 
 const ProductCard = ({ product } : IProductCardProps) => {
+  let stars = "", dots = "";
+  if(product.rating) {
+    let i = 1;
+    while(i < Number(product.rating)) {
+      stars += "⭐";
+      i++;
+    }
+    while(i <= 5) {
+        dots += "•";
+        i++;
+    }
+  }
   return (
     <Link to={"/product/"+product._id} className="productCard" style={{
         textDecoration: "none",
         color: "black"
     }}>
         <div className="productCardImg" style={{
-            backgroundImage: `url(${SERVER_URL}${product.img_url})`
+            backgroundImage: `url(${STATIC_URL + product.imagePath})`
         }}></div>
         <div className="productCardDesc">
-            <h4>{product.prod_name}</h4>
+            <h4>{product.name}</h4>
             <p>
-                <b> Rs {Math.ceil((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
+                <b> Rs {product.currentPrice}  </b>
                 <span style={{
                     fontSize: `14px`,
                     textDecoration: `line-through`
-                }}>{product.price}</span> 
-                ({product.discount_percent}% off)
+                }}>{product.originalPrice}</span> 
+                ({Math.ceil(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100)}% off)
             </p>
-            <h5 style={{ fontWeight: "normal" }}>⭐⭐⭐⭐⭐ 5.0</h5>
-            <h5 style={{ fontWeight: "normal" }}>Free Delivery</h5>
+            <h5 style={{ fontWeight: "normal" }}>
+                {
+                    (product.rating) ?
+                    (product.rating !== -1) ?
+                    (stars+dots+" "+product.rating) :
+                    "No ratings"
+                    :
+                    ""
+                }
+            </h5>
         </div>
     </Link>
   )

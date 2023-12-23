@@ -1,11 +1,26 @@
 import axiosClient from "../config/axiosClient";
 import { IProductApiReturn, IProductFuncReturn } from "../types/apiUtilTypes";
 
-export const getProducts = async () : Promise<IProductFuncReturn> => {
+export interface IProductQuery {
+    id?: string, 
+    name?: string, 
+    minPrice?: number, 
+    maxPrice?: number, 
+    minRating?: number, 
+    maxRating?: number, 
+    categoryId?: string, 
+    page?: number, 
+    limit?: number
+};
+
+export const getProducts = async (query?: IProductQuery) : Promise<IProductFuncReturn> => {
     try 
     {
-        const res = await axiosClient.get("/product");
+        const res = await axiosClient.get("/product", {
+            params: query ? query : {}
+        });
         const data: IProductApiReturn = res.data;
+        console.log(data);
         if(res.status === 200) {
             return ({ isSuccess: true, products: (data.products) ? data.products : [], error: null, product: null });
         } else {
