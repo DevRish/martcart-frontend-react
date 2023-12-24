@@ -11,7 +11,7 @@ import { logoutAction } from '../../reducers/auth/authActions';
 interface IProfileProps {
     // Global State Props
     logoutDispatch: () => void,
-};
+}
 
 const Profile = ({ logoutDispatch } : IProfileProps) => {
 
@@ -72,4 +72,6 @@ const mapDispatchToProps = {
   logoutDispatch: logoutAction,
 }
 
-export default connect(null, mapDispatchToProps)(Profile);
+const ProfileWrapped = connect(null, mapDispatchToProps)(Profile);
+
+export default ProfileWrapped;

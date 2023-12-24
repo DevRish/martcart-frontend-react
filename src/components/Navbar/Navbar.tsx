@@ -10,7 +10,7 @@ interface INavbarProps {
     cartItemCount: number,
     firstname: string,
     lastname: string,
-};
+}
 
 const Navbar = ({ isLoggedIn, cartItemCount, firstname, lastname } : INavbarProps) => {
 
@@ -75,4 +75,6 @@ const mapStateToProps = function(state: IGlobalState) {
   }
 }
 
-export default connect(mapStateToProps)(Navbar);
+const NavbarWrapped = connect(mapStateToProps)(Navbar);
+
+export default NavbarWrapped;

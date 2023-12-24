@@ -25,10 +25,10 @@ import Spinner from './components/Spinner/Spinner';
 
 interface IAppProps {
     // Global State props
-    loginDispatch: Function,
-    setCartDispatch: Function,
-    setOrdersDispatch: Function,
-};
+    loginDispatch: (...args: any[]) => void,
+    setCartDispatch: (...args: any[]) => void,
+    setOrdersDispatch: (...args: any[]) => void,
+}
 
 const App = ({ loginDispatch, setCartDispatch, setOrdersDispatch } : IAppProps) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -95,9 +95,11 @@ const App = ({ loginDispatch, setCartDispatch, setOrdersDispatch } : IAppProps) 
 }
 
 const mapDispatchToProps = {
-    loginDispatch: loginAction,
-    setCartDispatch: setCartAction,
-    setOrdersDispatch: setOrdersAction,
-  }
-  
-  export default connect(null, mapDispatchToProps)(App);
+  loginDispatch: loginAction,
+  setCartDispatch: setCartAction,
+  setOrdersDispatch: setOrdersAction,
+}
+
+const AppWrapped = connect(null, mapDispatchToProps)(App);
+
+export default AppWrapped;

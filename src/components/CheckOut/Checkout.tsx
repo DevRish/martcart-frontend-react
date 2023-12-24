@@ -21,7 +21,7 @@ interface ICheckoutProps {
     currItemId: string,
     price: number,
     isCart: boolean, // tells whether single item checkout or cart checkout
-};
+}
 
 const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersDispatch } : ICheckoutProps) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersD
     const [pin, setPin] = useState('');
     const [payChosen, setPayChosen] = useState(false);
     const [isEmpty, setIsEmpty] = useState(false);
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setIsLoading(true);
@@ -60,7 +60,7 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersD
         {
             if(isCart) {
                 const newOrders: IOrder[] = [];
-                for(let item of cart) {
+                for(const item of cart) {
                     const orderFuncRet = await addNewOrder({
                         productId: String(item.productId._id),
                         quantity: item.quantity,
@@ -187,4 +187,6 @@ const mapDispatchToProps = {
   addOrdersDispatch: addOrdersAction,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Checkout);
+const CheckoutWrapped = connect(mapStateToProps, mapDispatchToProps)(Checkout);
+
+export default CheckoutWrapped;

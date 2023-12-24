@@ -1,7 +1,7 @@
 export interface IAction {
     type: string,
     payload: any,
-};
+}
 
 export interface IGlobalAuthState {
     isLoggedIn: boolean,
@@ -9,21 +9,21 @@ export interface IGlobalAuthState {
         firstname: string,
         lastname: string, 
     } | null,
-};
+}
 
 export interface ICategory {
     _id?: string,
     name: string,
     itemCount: number,
     tagLines: string[],
-};
+}
 
 export interface IEvent {
     _id?: string,
     imagePath: string,
     tagLines: string[],
     ctaLink: string
-};
+}
 
 export interface IProduct {
     _id?: string,
@@ -42,18 +42,18 @@ export interface IProduct {
         name: string,
         value: string
     }],
-};
+}
 
 export interface ICartItem {
     _id?: string, // since mongodb was assigning ids to these objects too
     productId: IProduct,
     quantity: number,
-};
+}
 
 export interface IGlobalCartState {
     items: ICartItem[],
     total: number,
-};
+}
 
 export interface IUser {
     _id?: string,
@@ -81,4 +81,4 @@ export interface IGlobalState {
     auth: IGlobalAuthState,
     cart: IGlobalCartState,
     orders: IOrder[],
-};
+}

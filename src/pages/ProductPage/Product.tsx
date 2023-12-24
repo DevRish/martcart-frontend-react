@@ -10,13 +10,13 @@ import { IGlobalState, IProduct } from '../../types/coreTypes';
 import { getProductById } from '../../api/product';
 import { connect } from 'react-redux';
 import { addItemToCartAction } from '../../reducers/cart/cartActions';
-import { SERVER_URL } from '../../config/keys';
+import { STATIC_URL } from '../../config/keys';
 
 interface IProductProps {
     // Global State Props
     isLoggedIn: boolean,
     addItemToCartDispatch: (product: IProduct) => void,
-};
+}
 
 const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
     const [checkoutVis, setCheckoutVis] = useState(false);
@@ -40,7 +40,7 @@ const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
             setIsLoading(false);
         }
     }
-    let navigate = useNavigate();
+    const navigate = useNavigate();
 
     useEffect(() => {
         setIsLoading(true);
@@ -62,18 +62,18 @@ const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
             <div className="container">
                 <div className="orderCard">
                     <div className="orderImg" style={{
-                        backgroundImage: `url(${SERVER_URL}${product.img_url})`
+                        backgroundImage: `url(${STATIC_URL + product.imagePath})`
                     }}></div>
                     <div className="orderDesc">
-                        <h4>{product.prod_name}</h4>
+                        <h4>{product.name}</h4>
                         <div style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>
                             <p>
-                                <b> Rs {Math.ceil((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
+                                <b> Rs {product.currentPrice}  </b>
                                 <span style={{
                                     fontSize: `14px`,
                                     textDecoration: `line-through`
-                                }}>{product.price}</span> 
-                                ({product.discount_percent}% off)
+                                }}>{product.originalPrice}</span> 
+                                ({Math.ceil(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100)}% off)
                             </p>
                             <h5 style={{ fontWeight: "normal" }}>⭐⭐⭐⭐⭐ 5.0</h5>
                             <h5 style={{ fontWeight: "normal" }}>Free Delivery</h5>
@@ -104,7 +104,7 @@ const Product = ({ isLoggedIn, addItemToCartDispatch } : IProductProps) => {
                     <Checkout 
                         isCart={false} 
                         currItemId={String(product._id)}
-                        price={ Math.ceil((product.price)*( 1 - (product.discount_percent*0.01))) }
+                        price={product.currentPrice}
                     />
                 }
             </div> :
@@ -124,4 +124,6 @@ const mapDispatchToProps = {
   addItemToCartDispatch: addItemToCartAction,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Product);
+const ProductWrapped = connect(mapStateToProps, mapDispatchToProps)(Product)
+
+export default ProductWrapped;

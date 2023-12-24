@@ -11,12 +11,12 @@ import { setOrdersAction } from '../../reducers/order/orderActions';
 
 interface ISignInProps {
     // Global State props
-    loginDispatch: Function,
-    setCartDispatch: Function,
-    setOrdersDispatch: Function,
+    loginDispatch: (...args: any[]) => void,
+    setCartDispatch: (...args: any[]) => void,
+    setOrdersDispatch: (...args: any[]) => void,
     // Local State props
-    setnavIndex: Function,
-};
+    setnavIndex: (...args: any[]) => void,
+}
 
 const SignIn = ({ setnavIndex, loginDispatch, setCartDispatch, setOrdersDispatch } : ISignInProps) => {
 
@@ -87,4 +87,6 @@ const mapDispatchToProps = {
   setOrdersDispatch: setOrdersAction,
 }
 
-export default connect(null, mapDispatchToProps)(SignIn);
+const SignInWrapped = connect(null, mapDispatchToProps)(SignIn);
+
+export default SignInWrapped;

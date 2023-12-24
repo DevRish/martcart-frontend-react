@@ -11,7 +11,7 @@ export function cartReducer(state = initialState, action: IAction): IGlobalCartS
         case cartActionTypes.ADD_ITEM: {
             let exists = false;
             let newItems = [];
-            for(let item of state.items) {
+            for(const item of state.items) {
                 newItems.push(JSON.parse(JSON.stringify(item)));
             }
             newItems = newItems.map((item: ICartItem) => {
@@ -28,7 +28,7 @@ export function cartReducer(state = initialState, action: IAction): IGlobalCartS
         }
         case cartActionTypes.REMOVE_ITEM: {
             let newItems = [];
-            for(let item of state.items) {
+            for(const item of state.items) {
                 newItems.push(JSON.parse(JSON.stringify(item)));
             }
             newItems = newItems.map((item: ICartItem) => { // decrease quantity

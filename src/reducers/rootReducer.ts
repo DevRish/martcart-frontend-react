@@ -9,4 +9,4 @@ export default function rootReducer(state: any = {}, action: IAction): IGlobalSt
         cart: cartReducer(state.cart, action),
         orders: orderReducer(state.orders, action),
     }
-};
+}

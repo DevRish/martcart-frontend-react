@@ -11,7 +11,7 @@ export interface IProductQuery {
     categoryId?: string, 
     page?: number, 
     limit?: number
-};
+}
 
 export const getProducts = async (query?: IProductQuery) : Promise<IProductFuncReturn> => {
     try 
@@ -22,7 +22,7 @@ export const getProducts = async (query?: IProductQuery) : Promise<IProductFuncR
         const data: IProductApiReturn = res.data;
         console.log(data);
         if(res.status === 200) {
-            return ({ isSuccess: true, products: (data.products) ? data.products : [], error: null, product: null });
+            return ({ isSuccess: true, products: (data.products) ? data.products : [], error: null, product: null, total: data.total });
         } else {
             return ({ isSuccess: false, products: [], error: data.message, product: null });
         }

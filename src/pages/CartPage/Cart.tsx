@@ -5,14 +5,14 @@ import "./Cart.css";
 import { IGlobalCartState, IGlobalState } from '../../types/coreTypes';
 import { removeItemFromCartAction } from '../../reducers/cart/cartActions';
 import { connect } from 'react-redux';
-import { SERVER_URL } from '../../config/keys';
+import { STATIC_URL } from '../../config/keys';
 
 interface ICartProps {
     // Global State Props
     isLoggedIn: boolean,
     cart: IGlobalCartState,
     removeItemFromCartDispatch: (productId: string) => void,
-};
+}
 
 const Cart = ({ isLoggedIn, cart, removeItemFromCartDispatch } : ICartProps) => {
 
@@ -24,9 +24,8 @@ const Cart = ({ isLoggedIn, cart, removeItemFromCartDispatch } : ICartProps) => 
 
     const totalFunc = () => {
         let total = 0;
-        for(let item of cart.items) {
-            let priceNew = Math.ceil(item.productId.price*(1 - item.productId.discount_percent*0.01));
-            total += (item.quantity * priceNew);
+        for(const item of cart.items) {
+            total += (item.quantity * item.productId.currentPrice);
         }
         return total;
     }
@@ -60,13 +59,13 @@ const Cart = ({ isLoggedIn, cart, removeItemFromCartDispatch } : ICartProps) => 
                         return (
                             <div className="cartCard" key={index}>
                                 <div className="cartImg" style={{
-                                    backgroundImage: `url(${SERVER_URL}${product.img_url})`
+                                    backgroundImage: `url(${STATIC_URL + product.imagePath})`
                                 }}></div>
                                 <div className="cartDesc">
-                                    <h4>{product.prod_name}</h4>
+                                    <h4>{product.name}</h4>
                                     <div style={{ fontSize: "1.8rem", marginBottom: "1.5rem" }}>
                                         <p>
-                                            <b> Rs {item.quantity * Math.ceil((product.price)*( 1 - (product.discount_percent*0.01)))}  </b>
+                                            <b> Rs {item.quantity * product.currentPrice}  </b>
                                         </p>
                                         <p> <b>Quantity:</b> {item.quantity} </p>
                                         <h5 style={{ fontWeight: "normal" }}>⭐⭐⭐⭐⭐ 5.0</h5>
@@ -99,4 +98,6 @@ const mapDispatchToProps = {
   removeItemFromCartDispatch: removeItemFromCartAction,
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Cart);
+const CartWrapped = connect(mapStateToProps, mapDispatchToProps)(Cart);
+
+export default CartWrapped;

@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import "./MyOrders.css";
 import { IGlobalState, IOrder } from '../../types/coreTypes';
 import { connect } from 'react-redux';
-import { SERVER_URL } from '../../config/keys';
+import { STATIC_URL } from '../../config/keys';
 
 interface IOrderProps {
     // Global State Props
     isLoggedIn: boolean,
     orders: IOrder[],
-};
+}
 
 const MyOrders = ({ isLoggedIn, orders } : IOrderProps) => {
 
@@ -31,10 +31,10 @@ const MyOrders = ({ isLoggedIn, orders } : IOrderProps) => {
                         return (
                             <div className="orderCard" key={index}>
                                 <div className="orderImg" style={{
-                                    backgroundImage: `url(${SERVER_URL}${data.productId.img_url})`
+                                    backgroundImage: `url(${STATIC_URL + data.productId.imagePath})`
                                 }}></div>
                                 <div className="orderDesc">
-                                    <h3 style={{ fontSize: "3rem" }}>{data.productId.prod_name}</h3>
+                                    <h3 style={{ fontSize: "3rem" }}>{data.productId.name}</h3>
                                     <p style={{ fontSize: "2rem" }}>
                                         <b>Quantity:</b> {data.quantity} <br />
                                         <b>Total:</b> Rs {data.totalPrice} <br /> 
@@ -63,4 +63,6 @@ const mapStateToProps = function(state: IGlobalState) {
   }
 }
 
-export default connect(mapStateToProps)(MyOrders);
+const MyOrdersWrapped = connect(mapStateToProps)(MyOrders);
+
+export default MyOrdersWrapped;

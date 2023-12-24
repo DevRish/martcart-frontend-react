@@ -7,7 +7,7 @@ interface ICollectionProps {
     category: string,
     products: IProduct[];
     url: string,
-};
+}
 
 const Collection = ({ category, products, url } : ICollectionProps) => {
     return (
