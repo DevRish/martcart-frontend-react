@@ -16,6 +16,7 @@
     "@reduxjs/toolkit": "^1.9.6",
     "axios": "^1.5.0",
     "crypto-js": "^4.1.1",
+    "dotenv-webpack": "^8.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^8.1.2",
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/crypto-js": "^4.1.2",
+    "@types/dotenv-webpack": "^7.0.7",
     "@types/node": "^20.6.0",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
@@ -32,23 +34,21 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/redux-logger": "^3.0.9",
     "@types/universal-cookie": "^3.0.0",
-    "dotenv": "^16.3.1",
-    "redux-logger": "^3.0.6",
-    "typescript": "^5.2.2",
-    
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
+    "css-loader": "^6.8.1",
+    "dotenv": "^16.3.1",
+    "esbuild-loader": "^4.0.2",
     "eslint": "^8.55.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-
-    "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1",
-    "css-loader": "^6.8.1",
-    "esbuild-loader": "^4.0.2",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.3",
-    "style-loader": "^3.3.3"
+    "redux-logger": "^3.0.6",
+    "style-loader": "^3.3.3",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
   }
 }

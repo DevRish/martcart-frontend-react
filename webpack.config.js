@@ -1,18 +1,18 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-import webpack from 'webpack';
+import Dotenv from "dotenv-webpack";
+// import webpack from 'webpack';
 import { EsbuildPlugin } from 'esbuild-loader'; // minifier
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 
-const env = dotenv.config().parsed;
+// const env = dotenv.config().parsed;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const envKeys = Object.keys(env).reduce((prev, next) => {
-  prev[`process.env.${next}`] = JSON.stringify(env[next]);
-  return prev;
-}, {});
+// const envKeys = Object.keys(env).reduce((prev, next) => {
+//   prev[`process.env.${next}`] = JSON.stringify(env[next]);
+//   return prev;
+// }, {});
 
 const config = {
   entry: './src/index.tsx',
@@ -58,7 +58,11 @@ const config = {
   },
   plugins: [
     new HtmlWebpackPlugin({ template: './public/index.html' }),
-    new webpack.DefinePlugin(envKeys)
+    new Dotenv({
+      path: "./.env",
+      systemvars: true
+    }),
+    // new webpack.DefinePlugin(envKeys)
   ],
   devServer: {
     static: [
