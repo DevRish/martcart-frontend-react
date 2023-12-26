@@ -20,7 +20,7 @@ export const getProducts = async (query?: IProductQuery) : Promise<IProductFuncR
             params: query ? query : {}
         });
         const data: IProductApiReturn = res.data;
-        console.log(data);
+        // console.log(data);
         if(res.status === 200) {
             return ({ isSuccess: true, products: (data.products) ? data.products : [], error: null, product: null, total: data.total });
         } else {

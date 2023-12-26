@@ -54,7 +54,6 @@ const Navbar = ({ isLoggedIn, cartItemCount, firstname, lastname } : INavbarProp
                                 display: "grid",
                                 placeItems:"center"
                         }}>
-                            {/* {console.log(cartQuery)} */}
                             <p style={{ fontSize: "1.5rem" }}>{cartItemCount}</p></div>
                             <i className="fas fa-shopping-cart"></i>
                         </Link>

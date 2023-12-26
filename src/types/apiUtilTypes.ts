@@ -75,6 +75,17 @@ export interface ICategoryFuncReturn {
     category?: ICategory | null,
 }
 
+export interface IPaymentApiReturn {
+    message: string,
+    orderId: string,
+}
+
+export interface IPaymentFuncReturn {
+    isSuccess: boolean,
+    error: string | null,
+    orderId: string,
+}
+
 export interface IProductApiReturn {
     message: string,
     products?: IProduct[],

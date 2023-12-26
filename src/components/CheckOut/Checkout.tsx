@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { stateList, cityList } from '../../utils/locationsList';
 import { getUserData } from "../../api/user";
@@ -11,6 +11,10 @@ import { ICartItem, IGlobalCartState, IGlobalState, IOrder, IUser } from "../../
 import { connect } from "react-redux";
 import { setCartAction } from "../../reducers/cart/cartActions";
 import { addOrdersAction } from "../../reducers/order/orderActions";
+import CryptoJS from "crypto-js";
+import { RAZORPAY_KEY_SECRET } from "../../config/keys";
+import { renderCheckoutConfig } from "../../utils/paymentUtils";
+import { createRzpOrder } from "../../api/payment";
 
 interface ICheckoutProps {
     // Global State props
@@ -23,6 +27,11 @@ interface ICheckoutProps {
     isCart: boolean, // tells whether single item checkout or cart checkout
 }
 
+enum PaymentOptions {
+    CASH_ON_DELIVERY="CASH_ON_DELIVERY",
+    RAZORPAY="RAZORPAY"
+}
+
 const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersDispatch } : ICheckoutProps) => {
     const [isLoading, setIsLoading] = useState(false);
     const [currUser, setCurrUser] = useState<IUser>();
@@ -30,9 +39,11 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersD
     const [city, setCity] = useState('');
     const [state, setState] = useState('');
     const [pin, setPin] = useState('');
-    const [payChosen, setPayChosen] = useState(false);
+    const [payChosen, setPayChosen] = useState("");
     const [isEmpty, setIsEmpty] = useState(false);
     const navigate = useNavigate();
+
+    const rzpOrderId = useRef("");
 
     useEffect(() => {
         setIsLoading(true);
@@ -55,36 +66,71 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersD
     };
 
     const addOrder = async () => {
-        if((address === '')||(city === '')||(state === '')||(pin === '')||(!payChosen)) setIsEmpty(true);
-        else
-        {
-            if(isCart) {
-                const newOrders: IOrder[] = [];
-                for(const item of cart) {
-                    const orderFuncRet = await addNewOrder({
-                        productId: String(item.productId._id),
-                        quantity: item.quantity,
-                        address: (address+', '+city+', '+state+' - '+pin),
-                    });
-                    if(orderFuncRet.order) newOrders.push(orderFuncRet.order);
-                }
-                await emptyCart();
-                addOrdersDispatch(newOrders);
-                setCartDispatch({
-                    items: [],
-                    total: 0,
-                });
-            } else {
+        if(isCart) {
+            const newOrders: IOrder[] = [];
+            for(const item of cart) {
                 const orderFuncRet = await addNewOrder({
-                    productId: currItemId,
-                    quantity: 1,
+                    productId: String(item.productId._id),
+                    quantity: item.quantity,
                     address: (address+', '+city+', '+state+' - '+pin),
                 });
-                if(orderFuncRet.order) {
-                    addOrdersDispatch([orderFuncRet.order]);
+                if(orderFuncRet.order) newOrders.push(orderFuncRet.order);
+            }
+            await emptyCart();
+            addOrdersDispatch(newOrders);
+            setCartDispatch({
+                items: [],
+                total: 0,
+            });
+        } else {
+            const orderFuncRet = await addNewOrder({
+                productId: currItemId,
+                quantity: 1,
+                address: (address+', '+city+', '+state+' - '+pin),
+            });
+            if(orderFuncRet.order) {
+                addOrdersDispatch([orderFuncRet.order]);
+            }
+        }
+        navigate('/myorders');
+    }
+
+    const rzpHandler = async (response) => {
+        const orderId = rzpOrderId.current; // got in previous api call to create order
+        const paymentId = response.razorpay_payment_id;
+        const signature = response.razorpay_signature;
+        const generatedSignature = CryptoJS.HmacSHA256(`${orderId}|${paymentId}`, RAZORPAY_KEY_SECRET).toString();
+        if(generatedSignature === signature) {
+            // payment success and signature verified
+            await addOrder();
+        } else {
+            alert("Invalid Payment: Signature not verified!");
+        }
+    }
+
+    const handleCheckout = async () => {
+        if((address === '')||(city === '')||(state === '')||(pin === '')||(payChosen === '')) setIsEmpty(true);
+        else {
+            if(payChosen === PaymentOptions.CASH_ON_DELIVERY) {
+                await addOrder();
+            }
+            if(payChosen === PaymentOptions.RAZORPAY) {
+                const paymentFuncRet = await createRzpOrder(price);
+                if(paymentFuncRet.isSuccess && paymentFuncRet.orderId) {
+                    rzpOrderId.current = paymentFuncRet.orderId;
+                    renderCheckoutConfig({
+                        amount: price,
+                        order_id: paymentFuncRet.orderId,
+                        name: String(currUser?.firstname + " " + currUser?.lastname),
+                        email: String(currUser?.email),
+                        phone: String(currUser?.phone),
+                        color: "#3399cc",
+                        handlePaymentSuccess: rzpHandler
+                    });
+                } else {
+                    alert("Failed to generate Razorpay order");
                 }
             }
-            navigate('/myorders');
         }
     }
 
@@ -159,16 +205,16 @@ const Checkout = ({ cart, currItemId, price, isCart, setCartDispatch, addOrdersD
                     <div className='checkout_field'>
                         <label>Choose payment method:</label>
                         <div className="checkout_radio">
-                            <input type="radio" name="pay_methods" id="checkout_cash" onChange={() => setPayChosen(true)}/>
+                            <input type="radio" name="pay_methods" id="checkout_cash" onChange={() => setPayChosen(PaymentOptions.CASH_ON_DELIVERY)}/>
                             <label htmlFor="checkout_cash">Cash on delivery</label>
                         </div>
                         <div className="checkout_radio">
-                            <input type="radio" name="pay_methods" id="checkout_razorpay" onChange={() => setPayChosen(true)}/>
+                            <input type="radio" name="pay_methods" id="checkout_razorpay" onChange={() => setPayChosen(PaymentOptions.RAZORPAY)}/>
                             <label htmlFor="checkout_razorpay"><img src={RazorPay} alt='RazorPay'/></label>
                         </div>
                     </div>
                     { isEmpty && <p className="checkout_error">Please specify all fields</p> }
-                    <button className='checkout_paybtn' onClick={addOrder}>Proceed</button>
+                    <button className='checkout_paybtn' onClick={handleCheckout}>Proceed</button>
                 </div>
                 </>
             }
