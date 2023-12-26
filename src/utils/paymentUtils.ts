@@ -1,4 +1,4 @@
-import { AWS_BUCKET_URL, RAZORPAY_KEY_ID, STATIC_URL } from "../config/keys";
+import { AWS_BUCKET_URL, RAZORPAY_KEY_ID } from "../config/keys";
 
 export interface IGetRazorpayCheckoutConfigArgs {
     amount: number,
