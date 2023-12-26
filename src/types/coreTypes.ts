@@ -22,7 +22,10 @@ export interface IEvent {
     _id?: string,
     imagePath: string,
     tagLines: string[],
-    ctaLink: string
+    ctaLink: string,
+    colorLight: string,
+    colorDark: string,
+    colorCTA: string
 }
 
 export interface IProduct {
